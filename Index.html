@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gemba Walk — Tableau de bord & Rapports</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,700;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1a1a18;
+  --paper: #f5f0e8;
+  --accent: #c8401e;
+  --accent2: #2a5c8f;
+  --gold: #b8930a;
+  --border: #c8c0b0;
+  --light: #faf8f4;
+  --section-bg: #ffffff;
+  --muted: #7a7468;
+  --success: #1a6b3a;
+  --success-bg: #eaf5ee;
+  --warning: #8a5a00;
+  --warning-bg: #fff8e6;
+  --info: #1a4f8a;
+  --info-bg: #e8f0fb;
+  --danger: #9b1e1e;
+  --danger-bg: #fdeaea;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--paper); color: var(--ink); min-height: 100vh; }
+
+/* ── NAV ── */
+.top-nav {
+  background: var(--ink);
+  display: flex;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: 0 24px;
+}
+.nav-brand {
+  font-family: 'DM Serif Display', serif;
+  color: #f5f0e8;
+  font-size: 18px;
+  padding: 14px 0;
+  margin-right: 24px;
+  flex-shrink: 0;
+}
+.nav-brand span { color: var(--accent); }
+.nav-tab {
+  padding: 16px 18px;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(245,240,232,.5);
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  border-top: none; border-left: none; border-right: none;
+  transition: all .15s;
+  background: none;
+  font-family: 'DM Sans', sans-serif;
+  white-space: nowrap;
+}
+.nav-tab:hover { color: rgba(245,240,232,.85); }
+.nav-tab.active { color: #f5f0e8; border-bottom-color: var(--accent); }
+.nav-right { margin-left: auto; }
+.nav-btn {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 7px 14px;
+  border-radius: 2px;
+  cursor: pointer;
+  background: var(--accent);
+  color: white;
+  border: none;
+  letter-spacing: .04em;
+}
+.nav-btn:hover { background: #a8321a; }
+
+/* ── VIEWS ── */
+.view { display: none; }
+.view.active { display: block; }
+.wrapper { max-width: 900px; margin: 0 auto; padding: 32px 20px 80px; }
+
+/* ── DASHBOARD ── */
+.dash-hero { margin-bottom: 24px; }
+.dash-hero h2 { font-family: 'DM Serif Display', serif; font-size: 30px; font-weight: 400; letter-spacing: -.02em; margin-bottom: 4px; }
+.dash-hero p { font-size: 13px; color: var(--muted); }
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+  margin-bottom: 22px;
+}
+.stat-card { background: var(--section-bg); border: 1.5px solid var(--border); border-radius: 2px; padding: 13px 15px; }
+.stat-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin-bottom: 5px; }
+.stat-val { font-family: 'DM Mono', monospace; font-size: 24px; font-weight: 500; line-height: 1; }
+.stat-card.warn .stat-val { color: var(--warning); }
+.stat-card.info .stat-val { color: var(--info); }
+.stat-card.ok .stat-val   { color: var(--success); }
+
+.filter-bar { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.filter-btn {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px; font-weight: 500;
+  padding: 5px 13px; border-radius: 99px;
+  cursor: pointer; border: 1.5px solid var(--border);
+  background: none; color: var(--muted); transition: all .15s;
+}
+.filter-btn.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+.gemba-cards { display: flex; flex-direction: column; gap: 10px; }
+.gemba-card {
+  background: var(--section-bg);
+  border: 1.5px solid var(--border);
+  border-radius: 2px;
+  padding: 16px 18px;
+  border-left: 4px solid var(--border);
+}
+.gemba-card.st-en_cours { border-left-color: var(--gold); }
+.gemba-card.st-a_suivre { border-left-color: var(--accent2); }
+.gemba-card.st-termine  { border-left-color: var(--success); }
+.gemba-card.retard      { border-left-color: var(--accent); }
+
+.gc-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+.gc-name { font-size: 15px; font-weight: 700; }
+.gc-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+.badge-st {
+  font-size: 10px; font-weight: 700; letter-spacing: .06em;
+  text-transform: uppercase; padding: 3px 9px; border-radius: 2px;
+}
+.badge-st.en_cours { background: var(--warning-bg); color: var(--warning); }
+.badge-st.a_suivre { background: var(--info-bg); color: var(--info); }
+.badge-st.termine  { background: var(--success-bg); color: var(--success); }
+.badge-retard { background: var(--danger-bg); color: var(--danger); font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 2px; text-transform: uppercase; letter-spacing: .06em; }
+
+.gc-actions { display: flex; gap: 5px; margin-top: 4px; }
+.gc-btn {
+  background: none; border: 1px solid var(--border); border-radius: 2px;
+  cursor: pointer; font-size: 11px; padding: 4px 10px;
+  font-family: 'DM Sans', sans-serif; transition: all .15s; color: var(--ink);
+}
+.gc-btn:hover { background: var(--light); }
+.gc-btn.danger { color: var(--accent); }
+.gc-btn.danger:hover { background: #fde; border-color: var(--accent); }
+.gc-btn.open-r { color: var(--accent2); border-color: var(--accent2); }
+.gc-btn.open-r:hover { background: var(--info-bg); }
+
+.gc-qw {
+  font-size: 12px; background: var(--light);
+  border-left: 3px solid var(--gold); padding: 6px 10px;
+  margin-bottom: 8px; display: flex; gap: 6px; align-items: flex-start;
+}
+.qw-label { font-weight: 700; color: var(--gold); flex-shrink: 0; font-size: 10px; text-transform: uppercase; letter-spacing: .06em; margin-top: 1px; }
+
+.prog-bar-label { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-bottom: 3px; }
+.prog-bar { height: 4px; background: var(--border); border-radius: 99px; overflow: hidden; margin-bottom: 6px; }
+.prog-bar-fill { height: 100%; border-radius: 99px; background: var(--accent2); transition: width .4s; }
+.prog-bar-fill.done { background: var(--success); }
+
+.gc-footer { display: flex; gap: 14px; font-size: 11px; color: var(--muted); flex-wrap: wrap; }
+
+.empty-state { text-align: center; padding: 48px 20px; color: var(--muted); font-size: 14px; display: none; }
+
+/* ── MODAL ── */
+.modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(10,10,8,.5); z-index: 500;
+  align-items: center; justify-content: center; padding: 16px;
+}
+.modal-overlay.open { display: flex; }
+.modal-box {
+  background: var(--section-bg); border: 1.5px solid var(--border);
+  border-radius: 2px; width: 100%; max-width: 540px;
+  max-height: 92vh; overflow-y: auto; padding: 22px;
+}
+.modal-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1.5px solid var(--border);
+}
+.modal-header h3 { font-family: 'DM Serif Display', serif; font-size: 18px; font-weight: 400; }
+.modal-close { background: none; border: none; cursor: pointer; font-size: 18px; color: var(--muted); }
+.modal-fields { display: flex; flex-direction: column; gap: 11px; }
+.mfield-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.mfield { display: flex; flex-direction: column; gap: 4px; }
+.mfield label { font-size: 10px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); }
+.mfield input, .mfield select, .mfield textarea {
+  font-family: 'DM Sans', sans-serif; font-size: 13px; padding: 7px 10px;
+  border: 1.5px solid var(--border); border-radius: 2px;
+  background: var(--light); color: var(--ink); width: 100%;
+}
+.mfield input:focus, .mfield select:focus, .mfield textarea:focus { outline: none; border-color: var(--accent2); background: #fff; }
+.mfield textarea { resize: vertical; min-height: 54px; }
+.modal-footer {
+  display: flex; gap: 10px; justify-content: flex-end;
+  margin-top: 18px; padding-top: 12px; border-top: 1.5px solid var(--border);
+}
+
+/* ── RAPPORT ── */
+.rapp-header {
+  display: flex; align-items: flex-end; gap: 16px;
+  margin-bottom: 26px; padding-bottom: 18px; border-bottom: 2px solid var(--ink);
+}
+.rapp-logo {
+  font-family: 'DM Serif Display', serif; font-size: 12px; letter-spacing: .18em;
+  text-transform: uppercase; color: var(--accent);
+  writing-mode: vertical-rl; transform: rotate(180deg);
+  line-height: 1; border-left: 3px solid var(--accent);
+  padding-left: 6px; height: 52px; display: flex; align-items: center;
+}
+.rapp-title-block h1 { font-family: 'DM Serif Display', serif; font-size: 36px; line-height: 1; letter-spacing: -.02em; }
+.rapp-title-block p { font-size: 13px; color: var(--muted); margin-top: 4px; font-weight: 300; }
+.rapp-badge {
+  margin-left: auto; background: var(--ink); color: var(--paper);
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  padding: 6px 12px; border-radius: 2px; letter-spacing: .08em;
+  white-space: nowrap; align-self: center;
+}
+
+.card { background: var(--section-bg); border: 1.5px solid var(--border); border-radius: 2px; margin-bottom: 16px; overflow: hidden; }
+.card-header { display: flex; align-items: center; gap: 12px; padding: 12px 18px; background: var(--ink); color: var(--paper); }
+.card-header .step-num {
+  font-family: 'DM Mono', monospace; font-size: 11px;
+  background: var(--accent); color: white;
+  width: 22px; height: 22px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.card-header h2 { font-family: 'DM Serif Display', serif; font-size: 15px; font-weight: 400; flex: 1; }
+.card-header .card-icon { font-size: 15px; opacity: .7; }
+.card-body { padding: 18px 20px; }
+
+.tip-box {
+  background: #eef3fa; border-left: 3px solid var(--accent2);
+  padding: 9px 12px; font-size: 12px; color: var(--accent2);
+  margin-bottom: 14px; line-height: 1.55; font-style: italic;
+}
+
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; margin-bottom: 11px; }
+.field-row.three { grid-template-columns: 1fr 1fr 1fr; }
+.field-row.full  { grid-template-columns: 1fr; }
+.field { display: flex; flex-direction: column; gap: 4px; }
+
+label { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+label span.req { color: var(--accent); }
+
+input[type="text"], input[type="date"], input[type="time"], input[type="number"], select, textarea {
+  font-family: 'DM Sans', sans-serif; font-size: 13px; padding: 8px 10px;
+  border: 1.5px solid var(--border); border-radius: 2px;
+  background: var(--light); color: var(--ink); transition: border-color .15s; width: 100%;
+}
+input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent2); background: #fff; }
+textarea { resize: vertical; min-height: 70px; line-height: 1.6; }
+textarea.tall  { min-height: 100px; }
+textarea.short { min-height: 54px; }
+
+.obs-list { display: flex; flex-direction: column; gap: 10px; }
+.obs-item { background: var(--light); border: 1.5px solid var(--border); border-radius: 2px; padding: 12px; }
+.obs-item-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.obs-num { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); }
+.btn-remove { background: none; border: 1px solid var(--border); border-radius: 2px; cursor: pointer; font-size: 11px; color: var(--accent); padding: 2px 7px; }
+.btn-remove:hover { background: #fde; }
+.obs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.obs-grid .full { grid-column: 1/-1; }
+
+.btn-add {
+  display: flex; align-items: center; gap: 6px;
+  background: none; border: 1.5px dashed var(--border); border-radius: 2px;
+  padding: 8px 14px; cursor: pointer; font-family: 'DM Sans', sans-serif;
+  font-size: 12px; color: var(--muted); transition: all .15s;
+  margin-top: 4px; width: 100%; justify-content: center;
+}
+.btn-add:hover { border-color: var(--accent2); color: var(--accent2); background: #eef3fa; }
+
+.action-item { background: var(--light); border: 1.5px solid var(--border); border-radius: 2px; padding: 12px; margin-bottom: 8px; }
+.action-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 8px; }
+
+.quickwin-box { background: #fffbf0; border: 2px solid var(--gold); border-radius: 2px; padding: 15px 17px; margin-bottom: 12px; }
+.quickwin-title { display: flex; align-items: center; gap: 6px; font-family: 'DM Serif Display', serif; font-size: 14px; color: var(--gold); margin-bottom: 10px; }
+
+.impact-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; margin-bottom: 12px; }
+.impact-cell { background: var(--light); border: 1.5px solid var(--border); border-radius: 2px; padding: 8px 10px; text-align: center; }
+.impact-cell label { display: block; margin-bottom: 3px; text-align: center; }
+
+.cta-bar { display: flex; gap: 10px; margin-top: 22px; flex-wrap: wrap; }
+.btn-primary {
+  background: var(--ink); color: var(--paper); border: none;
+  padding: 11px 22px; font-family: 'DM Sans', sans-serif;
+  font-size: 13px; font-weight: 700; letter-spacing: .06em;
+  text-transform: uppercase; cursor: pointer; border-radius: 2px; transition: background .15s;
+}
+.btn-primary:hover { background: var(--accent); }
+.btn-secondary {
+  background: none; color: var(--ink); border: 1.5px solid var(--ink);
+  padding: 11px 22px; font-family: 'DM Sans', sans-serif;
+  font-size: 13px; cursor: pointer; border-radius: 2px; transition: all .15s;
+}
+.btn-secondary:hover { background: var(--ink); color: var(--paper); }
+
+/* ── PRINT ── */
+@media print {
+  .top-nav, .cta-bar, .btn-add, .btn-remove, #viewDashboard, .modal-overlay { display: none !important; }
+  #viewRapport { display: block !important; }
+  body { background: white; }
+  .wrapper { padding: 0; max-width: 100%; }
+  .card { break-inside: avoid; border: 1pt solid #bbb; margin-bottom: 8pt; }
+  .card-header { background: #1a1a18 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  textarea, input, select { border: 1pt solid #ccc !important; background: transparent !important; }
+  .obs-item, .action-item { break-inside: avoid; }
+  .quickwin-box { border: 1.5pt solid #b8930a !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .tip-box { display: none !important; }
+}
+
+@media (max-width: 600px) {
+  .field-row, .obs-grid, .action-grid, .impact-grid, .mfield-row { grid-template-columns: 1fr; }
+  .field-row.three { grid-template-columns: 1fr 1fr; }
+  .rapp-logo { display: none; }
+  .top-nav { padding: 0 12px; }
+  .nav-tab { padding: 14px 10px; font-size: 11px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══ NAV ══ -->
+<nav class="top-nav">
+  <div class="nav-brand">Gemba<span>.</span></div>
+  <button class="nav-tab active" id="tabDash" onclick="showView('dashboard',this)">📋 Tableau de bord</button>
+  <button class="nav-tab" id="tabRapp" onclick="showView('rapport',this)">📝 Rapport</button>
+  <div class="nav-right">
+    <button class="nav-btn" onclick="nouveauGemba()">＋ Nouveau Gemba</button>
+  </div>
+</nav>
+
+<!-- ══════════ VUE DASHBOARD ══════════ -->
+<div class="view active" id="viewDashboard">
+  <div class="wrapper">
+    <div class="dash-hero">
+      <h2>Mes Gemba Walks</h2>
+      <p>Suivi continu des observations terrain et des plans d'actions</p>
+    </div>
+    <div class="stats-grid" id="statsGrid"></div>
+    <div class="filter-bar" id="filterBar"></div>
+    <div class="gemba-cards" id="gembaCards"></div>
+    <div class="empty-state" id="emptyState">
+      Aucun Gemba Walk enregistré pour ce filtre.<br><br>
+      <button class="btn-primary" onclick="nouveauGemba()">Créer le premier Gemba</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ VUE RAPPORT ══════════ -->
+<div class="view" id="viewRapport">
+  <div class="wrapper">
+
+    <div class="rapp-header">
+      <div class="rapp-logo">Gemba</div>
+      <div class="rapp-title-block">
+        <h1>Rapport Gemba Walk</h1>
+        <p>Observation terrain · Management visuel &amp; amélioration continue</p>
+      </div>
+      <div class="rapp-badge">LEAN · Kaizen</div>
+    </div>
+
+    <!-- 0 Identification -->
+    <div class="card">
+      <div class="card-header"><div class="step-num">0</div><h2>Identification</h2><span class="card-icon">📋</span></div>
+      <div class="card-body">
+        <div class="field-row">
+          <div class="field"><label>Prénom <span class="req">*</span></label><input type="text" id="prenom" placeholder="Prénom du manager"></div>
+          <div class="field"><label>Nom <span class="req">*</span></label><input type="text" id="nom" placeholder="Nom du manager"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Fonction</label><input type="text" id="fonction" placeholder="Ex : Responsable HSE, Chef d'équipe…"></div>
+          <div class="field"><label>Date <span class="req">*</span></label><input type="date" id="dateGemba"></div>
+        </div>
+        <div class="field-row three">
+          <div class="field"><label>Heure début</label><input type="time" id="heureDebut"></div>
+          <div class="field"><label>Heure fin</label><input type="time" id="heureFin"></div>
+          <div class="field"><label>Durée</label><input type="text" id="duree" readonly style="background:#f0f0ec;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1 Zone -->
+    <div class="card">
+      <div class="card-header"><div class="step-num">1</div><h2>Choisir &amp; tenir sa zone — Aller sur le terrain</h2><span class="card-icon">📍</span></div>
+      <div class="card-body">
+        <div class="tip-box">💡 <strong>Règle d'or :</strong> Rester dans la zone choisie pour toute la durée du Gemba. Ne pas se disperser. Le manager se rend là où le travail se fait réellement.</div>
+        <div class="field-row">
+          <div class="field">
+            <label>Lieu / Zone observée <span class="req">*</span></label>
+            <select id="lieu">
+              <option value="">— Sélectionner un lieu —</option>
+              <option>Atelier de production</option><option>Ligne d'assemblage</option>
+              <option>Zone de préparation de commandes</option><option>Entrepôt logistique</option>
+              <option>Quai de chargement / déchargement</option><option>Zone de contrôle qualité</option>
+              <option>Poste de maintenance</option><option>Bureau / Open space</option>
+              <option>Zone de stockage matières premières</option><option>Hangar / Zone aéronautique</option>
+              <option>Autre (préciser ci-dessous)</option>
+            </select>
+          </div>
+          <div class="field"><label>Précision de la zone</label><input type="text" id="lieuAutre" placeholder="Ex : Cellule MRO n°3, Baie 4…"></div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Objectif principal <span class="req">*</span></label>
+            <select id="objectif">
+              <option value="">— Sélectionner —</option>
+              <option>Réduire les temps d'attente</option><option>Comprendre les erreurs qualité</option>
+              <option>Observer un processus / identifier des erreurs</option>
+              <option>Améliorer la sécurité / identifier les risques</option>
+              <option>Réduire les difficultés opérateurs</option><option>Observer les flux et déplacements</option>
+              <option>Contrôle 5S / propreté / rangement</option><option>Audit EPI / culture sécurité</option>
+              <option>Autre (préciser)</option>
+            </select>
+          </div>
+          <div class="field"><label>Précision de l'objectif</label><input type="text" id="objectifAutre" placeholder="Description libre…"></div>
+        </div>
+        <div class="field-row full"><div class="field"><label>Périmètre exact &amp; limites</label><textarea class="short" id="perimetre" placeholder="Ex : Postes de soudure A1 à A4 uniquement, hors bureau de contrôle…"></textarea></div></div>
+        <div class="field-row full"><div class="field"><label>Collaborateurs rencontrés</label><textarea class="short" id="collaborateurs" placeholder="Ex : Jean – opérateur poste 3 ; Sophie – chef d'équipe…"></textarea></div></div>
+      </div>
+    </div>
+
+    <!-- 2 Observations -->
+    <div class="card">
+      <div class="card-header"><div class="step-num">2</div><h2>Observer avec œil &amp; oreille naïfs — Poser des questions</h2><span class="card-icon">👁️</span></div>
+      <div class="card-body">
+        <div class="tip-box">💡 <strong>Posture :</strong> Questions ouvertes, sans jugement. « Qu'est-ce qui… » cherche une cause. Ne jamais poser de questions coupabilisantes. Objectif : comprendre et améliorer, pas sanctionner.</div>
+        <div class="obs-list" id="obsList"></div>
+        <button class="btn-add" onclick="addObservation()">＋ Ajouter une observation</button>
+      </div>
+    </div>
+
+    <!-- 3 Opportunités -->
+    <div class="card">
+      <div class="card-header"><div class="step-num">3</div><h2>Identifier les opportunités d'amélioration</h2><span class="card-icon">🔍</span></div>
+      <div class="card-body">
+        <div class="tip-box">💡 On cherche : tâches inutiles, déplacements superflus, retards, doublons, causes d'erreurs. Quantifier dès que possible.</div>
+        <div class="field-row full"><div class="field"><label>Synthèse des gaspillages / dysfonctionnements</label><textarea class="tall" id="gaspillages" placeholder="Ex : 6 allers-retours/h pour récupérer des étiquettes (~40 m/trajet), document de suivi illisible car rempli debout…"></textarea></div></div>
+        <p style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:9px;">Valorisation de l'impact</p>
+        <div class="impact-grid">
+          <div class="impact-cell"><label>Temps perdu (min/j)</label><input type="text" id="impactTemps" placeholder="Ex : 45 min"></div>
+          <div class="impact-cell"><label>Distance inutile</label><input type="text" id="impactDistance" placeholder="Ex : 240 m/j"></div>
+          <div class="impact-cell"><label>Coût estimé (€/an)</label><input type="text" id="impactCout" placeholder="Ex : ~3 200 €"></div>
+          <div class="impact-cell"><label>Risques sécurité</label><input type="text" id="impactRisques" placeholder="Ex : 2 risques chute"></div>
+          <div class="impact-cell"><label>Impact fatigue</label><input type="text" id="impactFatigue" placeholder="Ex : Fatigue fin de poste"></div>
+          <div class="impact-cell"><label>Autres indicateurs</label><input type="text" id="impactAutre" placeholder="Ex : Taux erreur…"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4 Plan d'actions -->
+    <div class="card">
+      <div class="card-header"><div class="step-num">4</div><h2>Plan d'actions — Quick Wins &amp; Suivi</h2><span class="card-icon">⚡</span></div>
+      <div class="card-body">
+        <div class="tip-box">💡 <strong>Règle :</strong> Maximum 1 à 2 Quick Win prioritaires. Mettre en place des améliorations concrètes, puis revenir vérifier avec l'équipe.</div>
+        <div class="quickwin-box">
+          <div class="quickwin-title">⭐ Quick Win N°1 — Priorité absolue</div>
+          <div class="field-row">
+            <div class="field"><label>Action à mener <span class="req">*</span></label><input type="text" id="qw1Action" placeholder="Ex : Déplacer l'imprimante au poste de préparation"></div>
+            <div class="field"><label>Responsable</label><input type="text" id="qw1Resp" placeholder="Prénom / Poste"></div>
+          </div>
+          <div class="field-row three">
+            <div class="field"><label>Délai</label><input type="date" id="qw1Delai"></div>
+            <div class="field"><label>Ressources nécessaires</label><input type="text" id="qw1Ressources" placeholder="Ex : Câble réseau…"></div>
+            <div class="field"><label>Coût estimé</label><input type="text" id="qw1Cout" placeholder="Ex : 50 €"></div>
+          </div>
+          <div class="field-row full"><div class="field"><label>Résultats attendus / Indicateur de succès</label><textarea class="short" id="qw1Resultats" placeholder="Ex : Suppression des 6 allers-retours/h → gain 45 min/j, −3 200 €/an…"></textarea></div></div>
+        </div>
+        <div class="quickwin-box">
+          <div class="quickwin-title">⭐ Quick Win N°2 — Si applicable</div>
+          <div class="field-row">
+            <div class="field"><label>Action à mener</label><input type="text" id="qw2Action" placeholder="Deuxième action quick win si nécessaire…"></div>
+            <div class="field"><label>Responsable</label><input type="text" id="qw2Resp" placeholder="Prénom / Poste"></div>
+          </div>
+          <div class="field-row three">
+            <div class="field"><label>Délai</label><input type="date" id="qw2Delai"></div>
+            <div class="field"><label>Ressources nécessaires</label><input type="text" id="qw2Ressources" placeholder="Ex : Formation, outil…"></div>
+            <div class="field"><label>Coût estimé</label><input type="text" id="qw2Cout" placeholder="Ex : 0 €"></div>
+          </div>
+          <div class="field-row full"><div class="field"><label>Résultats attendus</label><textarea class="short" id="qw2Resultats" placeholder="Résultats et indicateurs attendus…"></textarea></div></div>
+        </div>
+        <p style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:9px;">Actions complémentaires (moyen / long terme)</p>
+        <div id="actionList"></div>
+        <button class="btn-add" onclick="addAction()">＋ Ajouter une action complémentaire</button>
+        <div class="field-row" style="margin-top:14px;">
+          <div class="field"><label>Date de suivi prévue</label><input type="date" id="dateSuivi"></div>
+          <div class="field"><label>Modalités du suivi</label><input type="text" id="modaliteSuivi" placeholder="Ex : Point SQCDP, réunion équipe…"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Success Story -->
+    <div class="card">
+      <div class="card-header"><div class="step-num">✓</div><h2>Success Story — Avant / Après</h2><span class="card-icon">🏆</span></div>
+      <div class="card-body">
+        <div class="tip-box">💡 Valoriser les résultats et féliciter l'équipe. Le succès appartient aux opérateurs. À compléter après mise en œuvre.</div>
+        <div class="field-row">
+          <div class="field"><label>Situation AVANT</label><textarea class="tall" id="avant" placeholder="Situation initiale constatée lors du Gemba Walk…"></textarea></div>
+          <div class="field"><label>Situation APRÈS</label><textarea class="tall" id="apres" placeholder="Situation améliorée après mise en œuvre…"></textarea></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Gains mesurés</label><input type="text" id="gainsMesures" placeholder="Ex : −45 min/j, −240 m/j, −3 200 €/an…"></div>
+          <div class="field"><label>Félicitations équipe</label><input type="text" id="felicitations" placeholder="Ex : Merci à toute l'équipe Nuit…"></div>
+        </div>
+        <div class="field-row full"><div class="field"><label>Commentaires / Enseignements</label><textarea class="short" id="commentaires" placeholder="Retour d'expérience, leçons apprises, prochaines zones à observer…"></textarea></div></div>
+      </div>
+    </div>
+
+    <!-- Signature -->
+    <div class="card">
+      <div class="card-header"><div class="step-num">✍</div><h2>Validation</h2><span class="card-icon">📝</span></div>
+      <div class="card-body">
+        <div class="field-row">
+          <div class="field"><label>Signature du manager</label><input type="text" id="sigManager" placeholder="Nom complet"></div>
+          <div class="field"><label>Visa / Approbation N+1</label><input type="text" id="sigN1" placeholder="Nom du valideur si requis"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cta-bar">
+      <button class="btn-primary" onclick="sauvegarderEtImprimer()">🖨️ &nbsp;Enregistrer &amp; Imprimer PDF</button>
+      <button class="btn-primary" style="background:var(--accent2);" onclick="sauvegarderGemba(true)">💾 &nbsp;Enregistrer dans le tableau de bord</button>
+      <button class="btn-secondary" onclick="reinitialiser(true)">↺ &nbsp;Réinitialiser</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ MODAL EDIT ══ -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>Modifier le Gemba Walk</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-fields">
+      <div class="mfield-row">
+        <div class="mfield"><label>Prénom</label><input type="text" id="m_prenom"></div>
+        <div class="mfield"><label>Nom</label><input type="text" id="m_nom"></div>
+      </div>
+      <div class="mfield">
+        <label>Zone observée</label>
+        <select id="m_zone">
+          <option value="">— Sélectionner —</option>
+          <option>Atelier de production</option><option>Ligne d'assemblage</option>
+          <option>Zone de préparation de commandes</option><option>Entrepôt logistique</option>
+          <option>Quai de chargement / déchargement</option><option>Zone de contrôle qualité</option>
+          <option>Poste de maintenance</option><option>Bureau / Open space</option>
+          <option>Zone de stockage matières premières</option><option>Hangar / Zone aéronautique</option>
+          <option>Autre</option>
+        </select>
+      </div>
+      <div class="mfield"><label>Précision zone</label><input type="text" id="m_zoneDetail" placeholder="Ex : Baie 4…"></div>
+      <div class="mfield-row">
+        <div class="mfield"><label>Date</label><input type="date" id="m_date"></div>
+        <div class="mfield"><label>Objectif</label>
+          <select id="m_objectif">
+            <option>Sécurité / EPI</option><option>Qualité / Erreurs</option>
+            <option>Flux / Déplacements</option><option>Temps d'attente</option>
+            <option>Ergonomie / TMS</option><option>5S / Propreté</option>
+            <option>Processus</option><option>Autre</option>
+          </select>
+        </div>
+      </div>
+      <div class="mfield"><label>Quick Win principal</label><input type="text" id="m_quickwin" placeholder="Action prioritaire définie…"></div>
+      <div class="mfield-row">
+        <div class="mfield"><label>Nb actions définies</label><input type="number" id="m_nbActions" min="0" max="99" value="0"></div>
+        <div class="mfield"><label>Nb actions réalisées</label><input type="number" id="m_nbDone" min="0" max="99" value="0"></div>
+      </div>
+      <div class="mfield"><label>Date de suivi</label><input type="date" id="m_suivi"></div>
+      <div class="mfield"><label>Statut</label>
+        <select id="m_statut">
+          <option value="en_cours">En cours — actions à finaliser</option>
+          <option value="a_suivre">À suivre — en attente de résultats</option>
+          <option value="termine">Terminé — succès story validée</option>
+        </select>
+      </div>
+      <div class="mfield"><label>Notes</label><textarea id="m_notes" placeholder="Observations, points de vigilance…"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal()" style="padding:9px 18px;font-size:13px;">Annuler</button>
+      <button class="btn-primary" onclick="saveModal()" style="padding:9px 18px;font-size:13px;">Mettre à jour</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── NAV ── */
+function showView(name, tab) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('view' + name.charAt(0).toUpperCase() + name.slice(1)).classList.add('active');
+  if (tab) tab.classList.add('active');
+  if (name === 'dashboard') renderDashboard();
+}
+
+function nouveauGemba() {
+  reinitialiser(false);
+  showView('rapport', document.getElementById('tabRapp'));
+}
+
+/* ── STORAGE ── */
+const STOR = 'gemba_v3';
+let gembaData = [];
+let editId = null;
+let activeFilter = 'all';
+
+function loadData()  { try { gembaData = JSON.parse(localStorage.getItem(STOR) || '[]'); } catch(e) { gembaData = []; } }
+function saveData()  { try { localStorage.setItem(STOR, JSON.stringify(gembaData)); } catch(e) {} }
+function fmtDate(s)  { if (!s) return '—'; const [y,m,d] = s.split('-'); return `${d}/${m}/${y}`; }
+
+/* ── DASHBOARD ── */
+function renderDashboard() {
+  loadData();
+  const t  = gembaData.length;
+  const ec = gembaData.filter(g => g.statut==='en_cours').length;
+  const as = gembaData.filter(g => g.statut==='a_suivre').length;
+  const te = gembaData.filter(g => g.statut==='termine').length;
+  const ta = gembaData.reduce((s,g)=>s+(+g.nbActions||0),0);
+  const td = gembaData.reduce((s,g)=>s+(+g.nbDone||0),0);
+
+  document.getElementById('statsGrid').innerHTML = `
+    <div class="stat-card"><div class="stat-label">Total Gemba</div><div class="stat-val">${t}</div></div>
+    <div class="stat-card warn"><div class="stat-label">En cours</div><div class="stat-val">${ec}</div></div>
+    <div class="stat-card info"><div class="stat-label">À suivre</div><div class="stat-val">${as}</div></div>
+    <div class="stat-card ok"><div class="stat-label">Terminés</div><div class="stat-val">${te}</div></div>
+    <div class="stat-card"><div class="stat-label">Actions faites</div><div class="stat-val">${td}<span style="font-size:14px;color:var(--muted);">/${ta}</span></div></div>
+  `;
+
+  const fs = [{id:'all',l:'Tous'},{id:'en_cours',l:'⏳ En cours'},{id:'a_suivre',l:'👁 À suivre'},{id:'termine',l:'✅ Terminés'}];
+  document.getElementById('filterBar').innerHTML = fs.map(f =>
+    `<button class="filter-btn${activeFilter===f.id?' active':''}" onclick="setFilter('${f.id}')">${f.l}</button>`
+  ).join('');
+
+  renderCards();
+}
+
+function setFilter(f) { activeFilter = f; renderDashboard(); }
+
+function renderCards() {
+  const filtered = activeFilter==='all' ? gembaData : gembaData.filter(g=>g.statut===activeFilter);
+  const sorted = [...filtered].sort((a,b)=>{
+    const o={en_cours:0,a_suivre:1,termine:2};
+    return (o[a.statut]||0)-(o[b.statut]||0)||(b.date||'').localeCompare(a.date||'');
+  });
+
+  const empty = document.getElementById('emptyState');
+  const list  = document.getElementById('gembaCards');
+  if (!sorted.length) { empty.style.display='block'; list.innerHTML=''; return; }
+  empty.style.display='none';
+
+  const stCfg = { en_cours:{l:'En cours',c:'en_cours'}, a_suivre:{l:'À suivre',c:'a_suivre'}, termine:{l:'Terminé',c:'termine'} };
+
+  list.innerHTML = sorted.map(g => {
+    const st = stCfg[g.statut]||stCfg.en_cours;
+    const isR = g.statut==='en_cours' && g.suivi && new Date(g.suivi)<new Date();
+    const nb  = +g.nbActions||0;
+    const dn  = Math.min(+g.nbDone||0, nb);
+    const pct = nb ? Math.round((dn/nb)*100) : null;
+    const zone = g.zoneDetail ? `${g.zone} — ${g.zoneDetail}` : (g.zone||'—');
+    return `
+    <div class="gemba-card st-${g.statut}${isR?' retard':''}">
+      <div class="gc-top">
+        <div>
+          <div class="gc-name">${g.prenom||''} ${g.nom||''}</div>
+          <div class="gc-meta">📍 ${zone} &nbsp;·&nbsp; 🎯 ${g.objectif||'—'} &nbsp;·&nbsp; 📅 ${fmtDate(g.date)}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;">
+          <div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;">
+            <span class="badge-st ${st.c}">${st.l}</span>
+            ${isR?'<span class="badge-retard">Suivi en retard</span>':''}
+          </div>
+          <div class="gc-actions">
+            <button class="gc-btn open-r" onclick="ouvrirRapport('${g.id}')">📝 Rapport</button>
+            <button class="gc-btn" onclick="openModal('${g.id}')">✏️ Modifier</button>
+            <button class="gc-btn danger" onclick="delGemba('${g.id}')">🗑</button>
+          </div>
+        </div>
+      </div>
+      ${g.quickwin?`<div class="gc-qw"><span class="qw-label">Quick Win</span><span>${g.quickwin}</span></div>`:''}
+      ${pct!==null?`
+        <div class="prog-bar-label"><span>Actions réalisées</span><span>${dn} / ${nb}</span></div>
+        <div class="prog-bar"><div class="prog-bar-fill${pct===100?' done':''}" style="width:${pct}%"></div></div>
+      `:''}
+      <div class="gc-footer">
+        ${g.suivi?`<span>🔁 Suivi le ${fmtDate(g.suivi)}</span>`:''}
+        ${g.notes?`<span style="font-style:italic;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:340px;">${g.notes}</span>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function delGemba(id) {
+  if (!confirm('Supprimer ce Gemba Walk définitivement ?')) return;
+  gembaData = gembaData.filter(g=>g.id!==id);
+  saveData(); renderDashboard();
+}
+
+/* ── MODAL ── */
+function openModal(id) {
+  editId = id;
+  const g = gembaData.find(x=>x.id===id); if (!g) return;
+  ['prenom','nom','zoneDetail','quickwin','notes'].forEach(k => document.getElementById('m_'+k).value = g[k]||'');
+  ['date','suivi'].forEach(k => document.getElementById('m_'+k).value = g[k]||'');
+  ['zone','objectif','statut'].forEach(k => document.getElementById('m_'+k).value = g[k]||'');
+  document.getElementById('m_nbActions').value = g.nbActions||0;
+  document.getElementById('m_nbDone').value    = g.nbDone||0;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
+
+function saveModal() {
+  const g = gembaData.find(x=>x.id===editId); if (!g) return;
+  ['prenom','nom','zoneDetail','quickwin','notes'].forEach(k => g[k] = document.getElementById('m_'+k).value.trim());
+  ['date','suivi','zone','objectif','statut'].forEach(k => g[k] = document.getElementById('m_'+k).value);
+  g.nbActions = +document.getElementById('m_nbActions').value||0;
+  g.nbDone    = +document.getElementById('m_nbDone').value||0;
+  saveData(); closeModal(); renderDashboard();
+}
+
+document.getElementById('modalOverlay').addEventListener('click', e => {
+  if (e.target===document.getElementById('modalOverlay')) closeModal();
+});
+
+/* ── RAPPORT — CHAMPS DYNAMIQUES ── */
+let obsCount = 0, actCount = 0;
+const cats = [
+  {v:'securite',l:'🔴 Sécurité / EPI'},{v:'qualite',l:'🟠 Qualité / Erreur'},
+  {v:'deplacement',l:'🟡 Déplacement inutile'},{v:'attente',l:'🔵 Attente / Ralentissement'},
+  {v:'ergonomie',l:'🟣 Ergonomie / TMS'},{v:'proprete',l:'⚫ Propreté / 5S'},
+  {v:'outil',l:'⚙️ Outil / Équipement'},{v:'process',l:'📄 Procédure / Process'},{v:'autre',l:'⬜ Autre'},
+];
+
+function addObservation() {
+  obsCount++;
+  const div = document.createElement('div');
+  div.className='obs-item'; div.id=`obs_${obsCount}`;
+  div.innerHTML=`
+    <div class="obs-item-header"><span class="obs-num">Observation #${obsCount}</span><button class="btn-remove" onclick="removeItem('obs_${obsCount}')">✕ Supprimer</button></div>
+    <div class="obs-grid">
+      <div class="field"><label>Catégorie</label><select>${cats.map(c=>`<option value="${c.v}">${c.l}</option>`).join('')}</select></div>
+      <div class="field"><label>Localisation précise</label><input type="text" placeholder="Ex : Poste n°3, allée B…"></div>
+      <div class="field full"><label>Constat factuel</label><textarea class="short" placeholder="Décrire objectivement la situation constatée, sans jugement…"></textarea></div>
+      <div class="field full"><label>Question posée à l'opérateur (bienveillante)</label><textarea class="short" placeholder="Ex : Qu'est-ce qui t'empêche de porter tes gants ? / Qu'est-ce qui te fait perdre du temps ici ?"></textarea></div>
+      <div class="field full"><label>Réponse / Explication de l'opérateur</label><textarea class="short" placeholder="Ce que l'opérateur a expliqué — c'est souvent là que se cache la vraie cause…"></textarea></div>
+    </div>`;
+  document.getElementById('obsList').appendChild(div);
+}
+
+function addAction() {
+  actCount++;
+  const div = document.createElement('div');
+  div.className='action-item'; div.id=`act_${actCount}`;
+  div.innerHTML=`
+    <div class="obs-item-header" style="margin-bottom:8px;"><span class="obs-num">Action complémentaire #${actCount}</span><button class="btn-remove" onclick="removeItem('act_${actCount}')">✕ Supprimer</button></div>
+    <div class="action-grid">
+      <div class="field"><label>Description</label><input type="text" placeholder="Action à mener…"></div>
+      <div class="field"><label>Responsable</label><input type="text" placeholder="Prénom / Poste"></div>
+      <div class="field"><label>Échéance</label><input type="date"></div>
+      <div class="field"><label>Priorité</label><select><option>Moyen terme (1-3 mois)</option><option>Long terme (3-6 mois)</option><option>En étude</option></select></div>
+      <div class="field" style="grid-column:2/-1;"><label>Indicateur de succès</label><input type="text" placeholder="Comment mesurerons-nous le succès ?"></div>
+    </div>`;
+  document.getElementById('actionList').appendChild(div);
+}
+
+function removeItem(id) { document.getElementById(id)?.remove(); }
+
+/* ── DURÉE AUTO ── */
+['heureDebut','heureFin'].forEach(id => document.getElementById(id).addEventListener('change', () => {
+  const d=document.getElementById('heureDebut').value, f=document.getElementById('heureFin').value;
+  if (!d||!f) return;
+  const [dh,dm]=d.split(':').map(Number), [fh,fm]=f.split(':').map(Number);
+  let diff=(fh*60+fm)-(dh*60+dm); if(diff<0)diff+=1440;
+  document.getElementById('duree').value=`${Math.floor(diff/60)}h${String(diff%60).padStart(2,'0')}`;
+}));
+
+/* ── SAUVEGARDER ── */
+function sauvegarderGemba(notify) {
+  loadData();
+  const prenom = document.getElementById('prenom').value.trim();
+  const nom    = document.getElementById('nom').value.trim();
+  if (!prenom && !nom) { alert('Veuillez renseigner le prénom et le nom du manager avant de sauvegarder.'); return false; }
+  const g = {
+    id:         Date.now().toString(36)+Math.random().toString(36).slice(2,5),
+    prenom, nom,
+    zone:       document.getElementById('lieu').value,
+    zoneDetail: document.getElementById('lieuAutre').value.trim(),
+    date:       document.getElementById('dateGemba').value,
+    objectif:   document.getElementById('objectif').value || document.getElementById('objectifAutre').value || '—',
+    quickwin:   document.getElementById('qw1Action').value.trim(),
+    nbActions:  0, nbDone: 0,
+    suivi:      document.getElementById('dateSuivi').value,
+    statut:     'en_cours',
+    notes:      document.getElementById('commentaires').value.trim(),
+  };
+  gembaData.unshift(g); saveData();
+  if (notify) alert(`✅ Gemba de ${prenom} ${nom} enregistré dans le tableau de bord !`);
+  return true;
+}
+
+function sauvegarderEtImprimer() {
+  if (!sauvegarderGemba(false)) return;
+  const p=document.getElementById('prenom').value, n=document.getElementById('nom').value, d=document.getElementById('dateGemba').value;
+  document.title=`Gemba Walk - ${p} ${n} - ${d||'sans date'}`;
+  window.print();
+}
+
+/* ── OUVRIR RAPPORT DEPUIS DASHBOARD ── */
+function ouvrirRapport(id) {
+  loadData();
+  const g = gembaData.find(x=>x.id===id); if (!g) return;
+  reinitialiser(false);
+  document.getElementById('prenom').value    = g.prenom||'';
+  document.getElementById('nom').value       = g.nom||'';
+  document.getElementById('dateGemba').value = g.date||'';
+  if (g.zone) document.getElementById('lieu').value = g.zone;
+  document.getElementById('lieuAutre').value  = g.zoneDetail||'';
+  document.getElementById('qw1Action').value  = g.quickwin||'';
+  document.getElementById('dateSuivi').value  = g.suivi||'';
+  document.getElementById('commentaires').value = g.notes||'';
+  showView('rapport', document.getElementById('tabRapp'));
+}
+
+/* ── RÉINITIALISER ── */
+function reinitialiser(ask) {
+  if (ask && !confirm('Réinitialiser le rapport ? Toutes les données saisies seront perdues.')) return;
+  document.querySelectorAll('#viewRapport input, #viewRapport textarea, #viewRapport select').forEach(el => {
+    if (el.readOnly) return;
+    el.tagName==='SELECT' ? el.selectedIndex=0 : (el.value='');
+  });
+  document.getElementById('obsList').innerHTML='';
+  document.getElementById('actionList').innerHTML='';
+  obsCount=0; actCount=0;
+  document.getElementById('dateGemba').valueAsDate=new Date();
+  addObservation();
+}
+
+/* ── INIT ── */
+loadData();
+renderDashboard();
+document.getElementById('dateGemba').valueAsDate = new Date();
+addObservation();
+</script>
+</body>
+</html>
