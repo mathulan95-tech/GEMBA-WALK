@@ -2,848 +2,1371 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gemba Walk — Tableau de bord & Rapports</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,700;1,9..40,300&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Gemba Walk — Aéro Excellence</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <style>
 :root {
-  --ink: #1a1a18;
-  --paper: #f5f0e8;
-  --accent: #c8401e;
-  --accent2: #2a5c8f;
-  --gold: #b8930a;
-  --border: #c8c0b0;
-  --light: #faf8f4;
-  --section-bg: #ffffff;
-  --muted: #7a7468;
-  --success: #1a6b3a;
-  --success-bg: #eaf5ee;
-  --warning: #8a5a00;
-  --warning-bg: #fff8e6;
-  --info: #1a4f8a;
-  --info-bg: #e8f0fb;
-  --danger: #9b1e1e;
-  --danger-bg: #fdeaea;
+  --bg:       #f0f2f5;
+  --surface:  #ffffff;
+  --surface2: #f5f6f8;
+  --surface3: #eceef1;
+  --border:   #e2e5ea;
+  --border2:  #d0d4db;
+  --text:     #16181c;
+  --muted:    #6b7280;
+  --muted2:   #9ca3af;
+  --accent:   #e8532a;
+  --accent2:  #2563eb;
+  --gold:     #d97706;
+  --green:    #16a34a;
+  --red:      #dc2626;
+  --purple:   #7c3aed;
+  --r:        6px;
+  --r2:       10px;
+  --shadow:   0 1px 4px rgba(0,0,0,.08), 0 4px 16px rgba(0,0,0,.06);
+  --shadow2:  0 2px 8px rgba(0,0,0,.1);
 }
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'DM Sans', sans-serif; background: var(--paper); color: var(--ink); min-height: 100vh; }
+
+* { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+
+body {
+  font-family:'Instrument Sans',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+}
+
+::-webkit-scrollbar { width:4px; }
+::-webkit-scrollbar-track { background:var(--bg); }
+::-webkit-scrollbar-thumb { background:var(--border2); border-radius:99px; }
 
 /* ── NAV ── */
-.top-nav {
-  background: var(--ink);
-  display: flex;
-  align-items: center;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  padding: 0 24px;
+.nav {
+  position:fixed; top:0; left:0; right:0; z-index:200;
+  background:rgba(255,255,255,.92);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center; height:54px; padding:0 16px; gap:4px;
+  box-shadow:0 1px 3px rgba(0,0,0,.06);
 }
-.nav-brand {
-  font-family: 'DM Serif Display', serif;
-  color: #f5f0e8;
-  font-size: 18px;
-  padding: 14px 0;
-  margin-right: 24px;
-  flex-shrink: 0;
-}
-.nav-brand span { color: var(--accent); }
-.nav-tab {
-  padding: 16px 18px;
-  font-size: 13px;
-  font-weight: 500;
-  color: rgba(245,240,232,.5);
-  cursor: pointer;
-  border-bottom: 3px solid transparent;
-  border-top: none; border-left: none; border-right: none;
-  transition: all .15s;
-  background: none;
-  font-family: 'DM Sans', sans-serif;
-  white-space: nowrap;
-}
-.nav-tab:hover { color: rgba(245,240,232,.85); }
-.nav-tab.active { color: #f5f0e8; border-bottom-color: var(--accent); }
-.nav-right { margin-left: auto; }
-.nav-btn {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 12px;
-  font-weight: 700;
-  padding: 7px 14px;
-  border-radius: 2px;
-  cursor: pointer;
-  background: var(--accent);
-  color: white;
-  border: none;
-  letter-spacing: .04em;
-}
-.nav-btn:hover { background: #a8321a; }
 
-/* ── VIEWS ── */
-.view { display: none; }
-.view.active { display: block; }
-.wrapper { max-width: 900px; margin: 0 auto; padding: 32px 20px 80px; }
+.nav-brand {
+  font-family:'Syne',sans-serif; font-weight:800;
+  font-size:17px; letter-spacing:-.02em;
+  color:var(--text); margin-right:12px; flex-shrink:0;
+}
+.nav-brand em { color:var(--accent); font-style:normal; }
+
+.nav-tabs { display:flex; gap:2px; overflow-x:auto; scrollbar-width:none; flex:1; }
+.nav-tabs::-webkit-scrollbar { display:none; }
+
+.ntab {
+  padding:6px 12px; border-radius:var(--r);
+  font-size:12px; font-weight:500; white-space:nowrap;
+  background:none; border:none; color:var(--muted);
+  cursor:pointer; transition:all .15s; font-family:'Instrument Sans',sans-serif;
+}
+.ntab:hover { color:var(--text); background:var(--surface2); }
+.ntab.active { color:var(--text); background:var(--surface3); font-weight:600; }
+.ntab .dot { display:inline-block; width:6px; height:6px; border-radius:50%; margin-right:5px; vertical-align:middle; }
+
+.nav-timer {
+  font-family:'DM Mono',monospace; font-size:12px;
+  color:var(--gold); background:rgba(217,119,6,.08);
+  border:1px solid rgba(217,119,6,.2);
+  padding:4px 10px; border-radius:var(--r);
+  display:none; align-items:center; gap:6px;
+}
+.nav-timer.running { display:flex; }
+.timer-dot { width:6px; height:6px; border-radius:50%; background:var(--gold); animation:pulse 1s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+/* ── LAYOUT ── */
+.views { padding-top:54px; }
+.view { display:none; }
+.view.active { display:block; }
+.wrap { max-width:860px; margin:0 auto; padding:24px 16px 80px; }
+
+/* ── BUTTONS ── */
+.btn {
+  display:inline-flex; align-items:center; gap:7px;
+  padding:9px 16px; border-radius:var(--r);
+  font-family:'Instrument Sans',sans-serif; font-size:13px; font-weight:600;
+  cursor:pointer; border:none; transition:all .15s; white-space:nowrap;
+}
+.btn-primary { background:var(--accent); color:#fff; box-shadow:0 1px 3px rgba(232,83,42,.3); }
+.btn-primary:hover { background:#c73e1a; transform:translateY(-1px); box-shadow:0 3px 8px rgba(232,83,42,.3); }
+.btn-blue { background:var(--accent2); color:#fff; box-shadow:0 1px 3px rgba(37,99,235,.2); }
+.btn-blue:hover { background:#1d4ed8; }
+.btn-ghost { background:var(--surface); color:var(--text); border:1px solid var(--border2); }
+.btn-ghost:hover { background:var(--surface2); border-color:var(--border2); }
+.btn-danger { background:#fef2f2; color:var(--red); border:1px solid #fecaca; }
+.btn-danger:hover { background:#fee2e2; }
+.btn-sm { padding:5px 11px; font-size:12px; }
+.btn-icon {
+  padding:6px; border-radius:var(--r); background:var(--surface2);
+  border:1px solid var(--border); color:var(--muted); cursor:pointer;
+  transition:all .15s; font-size:13px; line-height:1;
+}
+.btn-icon:hover { color:var(--text); border-color:var(--border2); background:var(--surface3); }
+
+/* ── CARDS ── */
+.card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--r2); overflow:hidden; margin-bottom:10px;
+  box-shadow:var(--shadow);
+}
+.card-head {
+  display:flex; align-items:center; gap:10px;
+  padding:13px 16px; border-bottom:1px solid var(--border);
+  background:var(--surface2);
+}
+.card-head-icon {
+  width:28px; height:28px; border-radius:7px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:13px; flex-shrink:0;
+}
+.card-head h2 {
+  font-family:'Syne',sans-serif; font-size:13px; font-weight:700;
+  letter-spacing:.01em; flex:1; color:var(--text);
+}
+.card-body { padding:16px; }
+
+/* ── FORM ── */
+.frow { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
+.frow.three { grid-template-columns:1fr 1fr 1fr; }
+.frow.full { grid-template-columns:1fr; }
+.field { display:flex; flex-direction:column; gap:4px; }
+.flabel { font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); }
+.flabel .req { color:var(--accent); }
+
+input[type=text], input[type=date], input[type=time],
+input[type=number], select, textarea {
+  font-family:'Instrument Sans',sans-serif; font-size:13px;
+  padding:8px 11px; background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--r); color:var(--text); width:100%;
+  transition:border-color .15s, box-shadow .15s; -webkit-appearance:none;
+}
+input:focus, select:focus, textarea:focus {
+  outline:none; border-color:var(--accent2);
+  box-shadow:0 0 0 3px rgba(37,99,235,.08);
+}
+textarea { resize:vertical; min-height:68px; line-height:1.6; }
+textarea.short { min-height:52px; }
+textarea.tall { min-height:96px; }
+input[readonly] { color:var(--muted); background:var(--surface2); cursor:default; }
+select { cursor:pointer; }
+
+/* ── BADGES ── */
+.badge {
+  display:inline-flex; align-items:center; gap:4px;
+  padding:2px 8px; border-radius:99px;
+  font-size:10px; font-weight:700; letter-spacing:.05em; text-transform:uppercase;
+}
+.badge-orange { background:#fef3c7; color:#92400e; border:1px solid #fde68a; }
+.badge-blue   { background:#dbeafe; color:#1e40af; border:1px solid #bfdbfe; }
+.badge-green  { background:#dcfce7; color:#15803d; border:1px solid #bbf7d0; }
+.badge-red    { background:#fee2e2; color:#b91c1c; border:1px solid #fecaca; }
+.badge-gray   { background:var(--surface2); color:var(--muted); border:1px solid var(--border); }
+
+/* ── PROGRESS ── */
+.prog { height:3px; background:var(--surface3); border-radius:99px; overflow:hidden; }
+.prog-fill { height:100%; border-radius:99px; background:var(--accent2); transition:width .5s; }
+.prog-fill.done { background:var(--green); }
+
+/* ── TIP ── */
+.tip {
+  display:flex; gap:10px; align-items:flex-start;
+  background:#eff6ff; border:1px solid #bfdbfe;
+  border-radius:var(--r); padding:10px 13px;
+  font-size:12px; color:#1e40af; line-height:1.6; margin-bottom:14px;
+}
+.tip-icon { flex-shrink:0; margin-top:1px; }
 
 /* ── DASHBOARD ── */
-.dash-hero { margin-bottom: 24px; }
-.dash-hero h2 { font-family: 'DM Serif Display', serif; font-size: 30px; font-weight: 400; letter-spacing: -.02em; margin-bottom: 4px; }
-.dash-hero p { font-size: 13px; color: var(--muted); }
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 10px;
-  margin-bottom: 22px;
+.dash-hero {
+  display:flex; align-items:flex-end; justify-content:space-between;
+  gap:12px; flex-wrap:wrap; margin-bottom:18px;
 }
-.stat-card { background: var(--section-bg); border: 1.5px solid var(--border); border-radius: 2px; padding: 13px 15px; }
-.stat-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin-bottom: 5px; }
-.stat-val { font-family: 'DM Mono', monospace; font-size: 24px; font-weight: 500; line-height: 1; }
-.stat-card.warn .stat-val { color: var(--warning); }
-.stat-card.info .stat-val { color: var(--info); }
-.stat-card.ok .stat-val   { color: var(--success); }
+.dash-hero h2 { font-family:'Syne',sans-serif; font-size:26px; font-weight:800; letter-spacing:-.03em; }
+.dash-hero p { font-size:13px; color:var(--muted); margin-top:3px; }
 
-.filter-bar { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
-.filter-btn {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 12px; font-weight: 500;
-  padding: 5px 13px; border-radius: 99px;
-  cursor: pointer; border: 1.5px solid var(--border);
-  background: none; color: var(--muted); transition: all .15s;
+.stats { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin-bottom:14px; }
+.stat {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--r2); padding:13px 14px;
+  box-shadow:var(--shadow);
 }
-.filter-btn.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.stat-l { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.1em; color:var(--muted); margin-bottom:5px; }
+.stat-v { font-family:'DM Mono',monospace; font-size:24px; font-weight:400; line-height:1; color:var(--text); }
+.stat-v.orange { color:var(--gold); }
+.stat-v.blue   { color:var(--accent2); }
+.stat-v.green  { color:var(--green); }
+.stat-v.red    { color:var(--red); }
 
-.gemba-cards { display: flex; flex-direction: column; gap: 10px; }
-.gemba-card {
-  background: var(--section-bg);
-  border: 1.5px solid var(--border);
-  border-radius: 2px;
-  padding: 16px 18px;
-  border-left: 4px solid var(--border);
+.trend-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--r2); padding:16px; margin-bottom:10px;
+  box-shadow:var(--shadow);
 }
-.gemba-card.st-en_cours { border-left-color: var(--gold); }
-.gemba-card.st-a_suivre { border-left-color: var(--accent2); }
-.gemba-card.st-termine  { border-left-color: var(--success); }
-.gemba-card.retard      { border-left-color: var(--accent); }
+.trend-title { font-family:'Syne',sans-serif; font-size:12px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; margin-bottom:12px; }
 
-.gc-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
-.gc-name { font-size: 15px; font-weight: 700; }
-.gc-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.chart-bars { display:flex; align-items:flex-end; gap:6px; height:72px; }
+.chart-bar-wrap { flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; }
+.chart-bar { width:100%; border-radius:3px 3px 0 0; background:var(--accent2); opacity:.5; transition:opacity .15s; min-height:2px; cursor:pointer; }
+.chart-bar:hover { opacity:.9; }
+.chart-label { font-size:9px; color:var(--muted2); font-family:'DM Mono',monospace; }
 
-.badge-st {
-  font-size: 10px; font-weight: 700; letter-spacing: .06em;
-  text-transform: uppercase; padding: 3px 9px; border-radius: 2px;
+.cat-breakdown { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:6px; }
+.cat-item {
+  background:var(--surface2); border:1px solid var(--border);
+  border-radius:var(--r); padding:9px 11px;
+  display:flex; align-items:center; gap:8px;
 }
-.badge-st.en_cours { background: var(--warning-bg); color: var(--warning); }
-.badge-st.a_suivre { background: var(--info-bg); color: var(--info); }
-.badge-st.termine  { background: var(--success-bg); color: var(--success); }
-.badge-retard { background: var(--danger-bg); color: var(--danger); font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 2px; text-transform: uppercase; letter-spacing: .06em; }
+.cat-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+.cat-name { font-size:11px; flex:1; color:var(--text); }
+.cat-count { font-family:'DM Mono',monospace; font-size:11px; color:var(--muted); }
 
-.gc-actions { display: flex; gap: 5px; margin-top: 4px; }
-.gc-btn {
-  background: none; border: 1px solid var(--border); border-radius: 2px;
-  cursor: pointer; font-size: 11px; padding: 4px 10px;
-  font-family: 'DM Sans', sans-serif; transition: all .15s; color: var(--ink);
+.filters { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px; }
+.fbtn {
+  padding:5px 12px; border-radius:99px; border:1px solid var(--border);
+  background:var(--surface); color:var(--muted); font-size:12px; font-weight:500;
+  cursor:pointer; transition:all .15s; font-family:'Instrument Sans',sans-serif;
+  box-shadow:0 1px 2px rgba(0,0,0,.04);
 }
-.gc-btn:hover { background: var(--light); }
-.gc-btn.danger { color: var(--accent); }
-.gc-btn.danger:hover { background: #fde; border-color: var(--accent); }
-.gc-btn.open-r { color: var(--accent2); border-color: var(--accent2); }
-.gc-btn.open-r:hover { background: var(--info-bg); }
+.fbtn.active { background:var(--text); color:#fff; border-color:var(--text); }
 
-.gc-qw {
-  font-size: 12px; background: var(--light);
-  border-left: 3px solid var(--gold); padding: 6px 10px;
-  margin-bottom: 8px; display: flex; gap: 6px; align-items: flex-start;
+/* gemba cards */
+.gcards { display:flex; flex-direction:column; gap:8px; }
+.gcard {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--r2); padding:14px 16px;
+  border-left:3px solid var(--border2);
+  box-shadow:var(--shadow); transition:box-shadow .15s;
 }
-.qw-label { font-weight: 700; color: var(--gold); flex-shrink: 0; font-size: 10px; text-transform: uppercase; letter-spacing: .06em; margin-top: 1px; }
+.gcard:hover { box-shadow:var(--shadow2); }
+.gcard.ec { border-left-color:var(--gold); }
+.gcard.as { border-left-color:var(--accent2); }
+.gcard.te { border-left-color:var(--green); }
+.gcard.rt { border-left-color:var(--red); }
 
-.prog-bar-label { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-bottom: 3px; }
-.prog-bar { height: 4px; background: var(--border); border-radius: 99px; overflow: hidden; margin-bottom: 6px; }
-.prog-bar-fill { height: 100%; border-radius: 99px; background: var(--accent2); transition: width .4s; }
-.prog-bar-fill.done { background: var(--success); }
+.gcard-top { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:8px; }
+.gcard-name { font-family:'Syne',sans-serif; font-size:14px; font-weight:700; color:var(--text); }
+.gcard-meta { font-size:11px; color:var(--muted); margin-top:3px; display:flex; gap:8px; flex-wrap:wrap; }
+.gcard-actions { display:flex; gap:4px; flex-shrink:0; }
 
-.gc-footer { display: flex; gap: 14px; font-size: 11px; color: var(--muted); flex-wrap: wrap; }
+.gcard-qw {
+  font-size:12px; background:#fffbeb;
+  border-left:2px solid var(--gold); padding:6px 10px;
+  margin-bottom:8px; border-radius:0 var(--r) var(--r) 0;
+  display:flex; gap:6px;
+}
+.qw-l { font-weight:700; color:var(--gold); font-size:10px; text-transform:uppercase; letter-spacing:.06em; flex-shrink:0; margin-top:1px; }
 
-.empty-state { text-align: center; padding: 48px 20px; color: var(--muted); font-size: 14px; display: none; }
+.gcard-prog-label { display:flex; justify-content:space-between; font-size:11px; color:var(--muted); margin-bottom:3px; }
+.gcard-footer { display:flex; gap:12px; font-size:11px; color:var(--muted2); flex-wrap:wrap; margin-top:6px; }
 
-/* ── MODAL ── */
-.modal-overlay {
-  display: none; position: fixed; inset: 0;
-  background: rgba(10,10,8,.5); z-index: 500;
-  align-items: center; justify-content: center; padding: 16px;
-}
-.modal-overlay.open { display: flex; }
-.modal-box {
-  background: var(--section-bg); border: 1.5px solid var(--border);
-  border-radius: 2px; width: 100%; max-width: 540px;
-  max-height: 92vh; overflow-y: auto; padding: 22px;
-}
-.modal-header {
-  display: flex; justify-content: space-between; align-items: center;
-  margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1.5px solid var(--border);
-}
-.modal-header h3 { font-family: 'DM Serif Display', serif; font-size: 18px; font-weight: 400; }
-.modal-close { background: none; border: none; cursor: pointer; font-size: 18px; color: var(--muted); }
-.modal-fields { display: flex; flex-direction: column; gap: 11px; }
-.mfield-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.mfield { display: flex; flex-direction: column; gap: 4px; }
-.mfield label { font-size: 10px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); }
-.mfield input, .mfield select, .mfield textarea {
-  font-family: 'DM Sans', sans-serif; font-size: 13px; padding: 7px 10px;
-  border: 1.5px solid var(--border); border-radius: 2px;
-  background: var(--light); color: var(--ink); width: 100%;
-}
-.mfield input:focus, .mfield select:focus, .mfield textarea:focus { outline: none; border-color: var(--accent2); background: #fff; }
-.mfield textarea { resize: vertical; min-height: 54px; }
-.modal-footer {
-  display: flex; gap: 10px; justify-content: flex-end;
-  margin-top: 18px; padding-top: 12px; border-top: 1.5px solid var(--border);
-}
+.empty { text-align:center; padding:48px 20px; color:var(--muted); font-size:14px; display:none; }
 
 /* ── RAPPORT ── */
-.rapp-header {
-  display: flex; align-items: flex-end; gap: 16px;
-  margin-bottom: 26px; padding-bottom: 18px; border-bottom: 2px solid var(--ink);
+.rapp-hero {
+  display:flex; align-items:center; justify-content:space-between;
+  gap:12px; flex-wrap:wrap; margin-bottom:16px;
+  padding:18px 20px; background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--r2); box-shadow:var(--shadow);
+  border-left:4px solid var(--accent);
 }
-.rapp-logo {
-  font-family: 'DM Serif Display', serif; font-size: 12px; letter-spacing: .18em;
-  text-transform: uppercase; color: var(--accent);
-  writing-mode: vertical-rl; transform: rotate(180deg);
-  line-height: 1; border-left: 3px solid var(--accent);
-  padding-left: 6px; height: 52px; display: flex; align-items: center;
-}
-.rapp-title-block h1 { font-family: 'DM Serif Display', serif; font-size: 36px; line-height: 1; letter-spacing: -.02em; }
-.rapp-title-block p { font-size: 13px; color: var(--muted); margin-top: 4px; font-weight: 300; }
-.rapp-badge {
-  margin-left: auto; background: var(--ink); color: var(--paper);
-  font-family: 'DM Mono', monospace; font-size: 10px;
-  padding: 6px 12px; border-radius: 2px; letter-spacing: .08em;
-  white-space: nowrap; align-self: center;
+.rapp-hero h1 { font-family:'Syne',sans-serif; font-size:24px; font-weight:800; letter-spacing:-.02em; }
+.rapp-hero p { font-size:12px; color:var(--muted); margin-top:3px; }
+.rapp-tag {
+  font-family:'DM Mono',monospace; font-size:10px;
+  padding:4px 10px; border-radius:var(--r);
+  background:#fff7ed; color:var(--accent);
+  border:1px solid #fed7aa; letter-spacing:.1em;
 }
 
-.card { background: var(--section-bg); border: 1.5px solid var(--border); border-radius: 2px; margin-bottom: 16px; overflow: hidden; }
-.card-header { display: flex; align-items: center; gap: 12px; padding: 12px 18px; background: var(--ink); color: var(--paper); }
-.card-header .step-num {
-  font-family: 'DM Mono', monospace; font-size: 11px;
-  background: var(--accent); color: white;
-  width: 22px; height: 22px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+/* checklist */
+.checklist { display:flex; flex-direction:column; gap:5px; }
+.check-item {
+  display:flex; align-items:flex-start; gap:10px;
+  padding:9px 12px; border-radius:var(--r);
+  background:var(--surface2); border:1px solid var(--border);
+  cursor:pointer; transition:all .15s; user-select:none;
 }
-.card-header h2 { font-family: 'DM Serif Display', serif; font-size: 15px; font-weight: 400; flex: 1; }
-.card-header .card-icon { font-size: 15px; opacity: .7; }
-.card-body { padding: 18px 20px; }
+.check-item.checked { background:#f0fdf4; border-color:#bbf7d0; }
+.check-box {
+  width:17px; height:17px; border-radius:4px; flex-shrink:0;
+  border:1.5px solid var(--border2); margin-top:1px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:10px; transition:all .15s; background:var(--surface);
+}
+.check-item.checked .check-box { background:var(--green); border-color:var(--green); color:#fff; }
+.check-text { font-size:12px; line-height:1.5; color:var(--text); }
+.check-item.checked .check-text { color:var(--muted); text-decoration:line-through; }
 
-.tip-box {
-  background: #eef3fa; border-left: 3px solid var(--accent2);
-  padding: 9px 12px; font-size: 12px; color: var(--accent2);
-  margin-bottom: 14px; line-height: 1.55; font-style: italic;
+/* timer */
+.gemba-timer-bar {
+  display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+  padding:14px 16px; background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--r2); margin-bottom:10px; box-shadow:var(--shadow);
+}
+.gemba-timer-display {
+  font-family:'DM Mono',monospace; font-size:30px; font-weight:300;
+  letter-spacing:.05em; color:var(--gold);
+}
+.gemba-timer-display.inactive { color:var(--muted2); }
+.timer-controls { display:flex; gap:6px; flex-wrap:wrap; }
+.timer-progress-label { display:flex; justify-content:space-between; font-size:11px; color:var(--muted); margin-bottom:3px; }
+
+/* obs */
+.obs-list { display:flex; flex-direction:column; gap:8px; }
+.obs-item {
+  background:var(--surface2); border:1px solid var(--border);
+  border-radius:var(--r2); overflow:hidden;
+}
+.obs-item-head {
+  display:flex; align-items:center; gap:8px;
+  padding:9px 13px; background:var(--surface3);
+  border-bottom:1px solid var(--border);
+}
+.obs-time {
+  font-family:'DM Mono',monospace; font-size:11px;
+  color:var(--accent); background:#fff7ed;
+  padding:2px 8px; border-radius:99px; flex-shrink:0;
+  border:1px solid #fed7aa;
+}
+.obs-elapsed { font-size:11px; color:var(--muted2); flex-shrink:0; }
+.obs-item-body { padding:12px 13px; display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.obs-item-body .full { grid-column:1/-1; }
+
+/* photo */
+.photo-zone {
+  border:1.5px dashed var(--border2); border-radius:var(--r);
+  padding:10px; text-align:center; cursor:pointer;
+  transition:all .15s; position:relative; overflow:hidden;
+  background:var(--surface);
+}
+.photo-zone:hover { border-color:var(--accent2); background:#eff6ff; }
+.photo-zone input[type=file] { position:absolute; inset:0; opacity:0; cursor:pointer; }
+.photo-zone p { font-size:12px; color:var(--muted); pointer-events:none; }
+.photo-preview { display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
+.photo-thumb { width:56px; height:56px; border-radius:var(--r); object-fit:cover; border:1px solid var(--border); }
+
+/* scoring */
+.scoring-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:6px; }
+.score-label { font-size:10px; color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:.08em; margin-bottom:4px; }
+.score-stars { display:flex; gap:3px; }
+.star {
+  width:22px; height:22px; border-radius:4px;
+  background:var(--surface3); border:1px solid var(--border);
+  cursor:pointer; font-size:12px;
+  display:flex; align-items:center; justify-content:center;
+  transition:all .15s; color:var(--muted2);
+}
+.star.on { background:#fef3c7; border-color:#fde68a; color:var(--gold); }
+
+/* question detector */
+.q-warn {
+  display:none; align-items:center; gap:6px;
+  background:#fef2f2; border:1px solid #fecaca;
+  border-radius:var(--r); padding:7px 10px;
+  font-size:11px; color:var(--red); margin-top:4px;
+}
+.q-warn.show { display:flex; }
+
+/* QW box */
+.qw-box {
+  background:#fffbeb; border:1px solid #fde68a;
+  border-radius:var(--r2); padding:15px 16px; margin-bottom:10px;
+}
+.qw-box-title {
+  font-family:'Syne',sans-serif; font-size:13px; font-weight:700;
+  color:var(--gold); margin-bottom:11px; display:flex; align-items:center; gap:6px;
 }
 
-.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; margin-bottom: 11px; }
-.field-row.three { grid-template-columns: 1fr 1fr 1fr; }
-.field-row.full  { grid-template-columns: 1fr; }
-.field { display: flex; flex-direction: column; gap: 4px; }
-
-label { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
-label span.req { color: var(--accent); }
-
-input[type="text"], input[type="date"], input[type="time"], input[type="number"], select, textarea {
-  font-family: 'DM Sans', sans-serif; font-size: 13px; padding: 8px 10px;
-  border: 1.5px solid var(--border); border-radius: 2px;
-  background: var(--light); color: var(--ink); transition: border-color .15s; width: 100%;
+/* impact */
+.impact-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+.impact-cell {
+  background:var(--surface2); border:1px solid var(--border);
+  border-radius:var(--r); padding:9px 10px; text-align:center;
 }
-input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent2); background: #fff; }
-textarea { resize: vertical; min-height: 70px; line-height: 1.6; }
-textarea.tall  { min-height: 100px; }
-textarea.short { min-height: 54px; }
+.impact-cell .flabel { display:block; text-align:center; margin-bottom:3px; }
 
-.obs-list { display: flex; flex-direction: column; gap: 10px; }
-.obs-item { background: var(--light); border: 1.5px solid var(--border); border-radius: 2px; padding: 12px; }
-.obs-item-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-.obs-num { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); }
-.btn-remove { background: none; border: 1px solid var(--border); border-radius: 2px; cursor: pointer; font-size: 11px; color: var(--accent); padding: 2px 7px; }
-.btn-remove:hover { background: #fde; }
-.obs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.obs-grid .full { grid-column: 1/-1; }
-
-.btn-add {
-  display: flex; align-items: center; gap: 6px;
-  background: none; border: 1.5px dashed var(--border); border-radius: 2px;
-  padding: 8px 14px; cursor: pointer; font-family: 'DM Sans', sans-serif;
-  font-size: 12px; color: var(--muted); transition: all .15s;
-  margin-top: 4px; width: 100%; justify-content: center;
+/* matrix */
+.matrix-canvas {
+  width:100%; height:190px; border-radius:var(--r);
+  background:var(--surface2); border:1px solid var(--border); cursor:crosshair;
 }
-.btn-add:hover { border-color: var(--accent2); color: var(--accent2); background: #eef3fa; }
 
-.action-item { background: var(--light); border: 1.5px solid var(--border); border-radius: 2px; padding: 12px; margin-bottom: 8px; }
-.action-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 8px; }
+/* avant/après */
+.aa-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:10px; }
+.aa-box { border-radius:var(--r); padding:12px; }
+.aa-box.avant { background:#fff5f5; border:1px solid #fecaca; }
+.aa-box.apres { background:#f0fdf4; border:1px solid #bbf7d0; }
+.aa-label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.1em; margin-bottom:7px; display:flex; align-items:center; gap:4px; }
+.aa-box.avant .aa-label { color:var(--red); }
+.aa-box.apres .aa-label { color:var(--green); }
+.aa-box textarea { background:transparent; border:none; padding:0; color:var(--text); font-size:13px; box-shadow:none; }
+.aa-box textarea:focus { box-shadow:none; border:none; }
 
-.quickwin-box { background: #fffbf0; border: 2px solid var(--gold); border-radius: 2px; padding: 15px 17px; margin-bottom: 12px; }
-.quickwin-title { display: flex; align-items: center; gap: 6px; font-family: 'DM Serif Display', serif; font-size: 14px; color: var(--gold); margin-bottom: 10px; }
+/* cta */
+.cta-bar { display:flex; gap:8px; margin-top:18px; flex-wrap:wrap; }
 
-.impact-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; margin-bottom: 12px; }
-.impact-cell { background: var(--light); border: 1.5px solid var(--border); border-radius: 2px; padding: 8px 10px; text-align: center; }
-.impact-cell label { display: block; margin-bottom: 3px; text-align: center; }
-
-.cta-bar { display: flex; gap: 10px; margin-top: 22px; flex-wrap: wrap; }
-.btn-primary {
-  background: var(--ink); color: var(--paper); border: none;
-  padding: 11px 22px; font-family: 'DM Sans', sans-serif;
-  font-size: 13px; font-weight: 700; letter-spacing: .06em;
-  text-transform: uppercase; cursor: pointer; border-radius: 2px; transition: background .15s;
+/* modal */
+.modal-bg {
+  display:none; position:fixed; inset:0;
+  background:rgba(0,0,0,.35); z-index:400;
+  backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+  align-items:center; justify-content:center; padding:16px;
 }
-.btn-primary:hover { background: var(--accent); }
-.btn-secondary {
-  background: none; color: var(--ink); border: 1.5px solid var(--ink);
-  padding: 11px 22px; font-family: 'DM Sans', sans-serif;
-  font-size: 13px; cursor: pointer; border-radius: 2px; transition: all .15s;
+.modal-bg.open { display:flex; }
+.modal {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--r2); width:100%; max-width:520px;
+  max-height:90vh; overflow-y:auto; padding:20px;
+  box-shadow:var(--shadow2);
 }
-.btn-secondary:hover { background: var(--ink); color: var(--paper); }
+.modal-head {
+  display:flex; justify-content:space-between; align-items:center;
+  margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid var(--border);
+}
+.modal-head h3 { font-family:'Syne',sans-serif; font-size:16px; font-weight:700; }
+.modal-close { background:none; border:none; color:var(--muted); cursor:pointer; font-size:17px; padding:2px 5px; }
+.modal-foot { display:flex; gap:8px; justify-content:flex-end; margin-top:16px; padding-top:12px; border-top:1px solid var(--border); }
 
-/* ── PRINT ── */
+/* toast */
+.toast {
+  position:fixed; bottom:24px; left:50%;
+  transform:translateX(-50%) translateY(100px);
+  background:var(--text); color:#fff;
+  border-radius:var(--r2); padding:9px 16px;
+  font-size:13px; font-weight:500; z-index:999;
+  transition:transform .3s cubic-bezier(.34,1.56,.64,1);
+  white-space:nowrap; display:flex; align-items:center; gap:8px;
+  box-shadow:var(--shadow2);
+}
+.toast.show { transform:translateX(-50%) translateY(0); }
+.toast.success { background:#15803d; }
+.toast.warn { background:var(--gold); color:#fff; }
+
+/* présentation */
+.pres-overlay {
+  display:none; position:fixed; inset:0;
+  background:#fff; z-index:600;
+  align-items:center; justify-content:center;
+  flex-direction:column; padding:32px; overflow-y:auto;
+}
+.pres-overlay.open { display:flex; }
+.pres-content { max-width:780px; width:100%; }
+.pres-close { position:fixed; top:20px; right:20px; }
+
+/* stats */
+.stat-page-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px; margin-bottom:14px; }
+
+/* print */
 @media print {
-  .top-nav, .cta-bar, .btn-add, .btn-remove, #viewDashboard, .modal-overlay { display: none !important; }
-  #viewRapport { display: block !important; }
-  body { background: white; }
-  .wrapper { padding: 0; max-width: 100%; }
-  .card { break-inside: avoid; border: 1pt solid #bbb; margin-bottom: 8pt; }
-  .card-header { background: #1a1a18 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  textarea, input, select { border: 1pt solid #ccc !important; background: transparent !important; }
-  .obs-item, .action-item { break-inside: avoid; }
-  .quickwin-box { border: 1.5pt solid #b8930a !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  .tip-box { display: none !important; }
+  body { background:white; }
+  .nav, .cta-bar, .btn-add, .btn-icon, #viewDashboard, #viewStats,
+  .modal-bg, .toast, .pres-overlay, .gemba-timer-bar,
+  .checklist, .tip, .obs-terrain { display:none !important; }
+  #viewRapport { display:block !important; }
+  .card { border:1pt solid #ddd; break-inside:avoid; margin-bottom:8pt; box-shadow:none; }
+  .card-head { background:#f5f5f5 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  input, textarea, select { border:1pt solid #ddd !important; background:transparent !important; }
+  .views { padding-top:0; }
+  .rapp-hero { border-left:3pt solid #e8532a !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .photo-thumb { width:72px; height:72px; }
+  .aa-box.avant { background:#fff5f5 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .aa-box.apres { background:#f0fdf4 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
 }
 
-@media (max-width: 600px) {
-  .field-row, .obs-grid, .action-grid, .impact-grid, .mfield-row { grid-template-columns: 1fr; }
-  .field-row.three { grid-template-columns: 1fr 1fr; }
-  .rapp-logo { display: none; }
-  .top-nav { padding: 0 12px; }
-  .nav-tab { padding: 14px 10px; font-size: 11px; }
+@media (max-width:600px) {
+  .frow, .obs-item-body, .aa-grid, .scoring-grid { grid-template-columns:1fr; }
+  .frow.three { grid-template-columns:1fr 1fr; }
+  .stats { grid-template-columns:repeat(3,1fr); }
+  .impact-grid { grid-template-columns:1fr 1fr; }
+  .dash-hero h2 { font-size:22px; }
+  .rapp-hero h1 { font-size:20px; }
 }
 </style>
 </head>
 <body>
 
-<!-- ══ NAV ══ -->
-<nav class="top-nav">
-  <div class="nav-brand">Gemba<span>.</span></div>
-  <button class="nav-tab active" id="tabDash" onclick="showView('dashboard',this)">📋 Tableau de bord</button>
-  <button class="nav-tab" id="tabRapp" onclick="showView('rapport',this)">📝 Rapport</button>
-  <div class="nav-right">
-    <button class="nav-btn" onclick="nouveauGemba()">＋ Nouveau Gemba</button>
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-brand">Gemba<em>.</em></div>
+  <div class="nav-tabs">
+    <button class="ntab active" onclick="showView('Dashboard',this)" id="tabDash">
+      <span class="dot" style="background:var(--accent2)"></span>Dashboard
+    </button>
+    <button class="ntab" onclick="showView('Rapport',this)" id="tabRapp">
+      <span class="dot" style="background:var(--accent)"></span>Rapport
+    </button>
+    <button class="ntab" onclick="showView('Stats',this)" id="tabStats">
+      <span class="dot" style="background:var(--gold)"></span>Analyse
+    </button>
+  </div>
+  <div class="nav-timer" id="navTimer">
+    <div class="timer-dot"></div>
+    <span id="navTimerVal">00:00:00</span>
   </div>
 </nav>
 
-<!-- ══════════ VUE DASHBOARD ══════════ -->
+<div class="views">
+
+<!-- ════ DASHBOARD ════ -->
 <div class="view active" id="viewDashboard">
-  <div class="wrapper">
-    <div class="dash-hero">
+<div class="wrap">
+  <div class="dash-hero">
+    <div>
       <h2>Mes Gemba Walks</h2>
-      <p>Suivi continu des observations terrain et des plans d'actions</p>
+      <p>Suivi continu · Amélioration terrain</p>
     </div>
-    <div class="stats-grid" id="statsGrid"></div>
-    <div class="filter-bar" id="filterBar"></div>
-    <div class="gemba-cards" id="gembaCards"></div>
-    <div class="empty-state" id="emptyState">
-      Aucun Gemba Walk enregistré pour ce filtre.<br><br>
-      <button class="btn-primary" onclick="nouveauGemba()">Créer le premier Gemba</button>
-    </div>
+    <button class="btn btn-primary" onclick="nouveauGemba()">＋ Nouveau Gemba</button>
+  </div>
+
+  <div class="stats" id="statsGrid"></div>
+
+  <div class="trend-card">
+    <div class="trend-title">Observations par semaine</div>
+    <div class="chart-bars" id="chartBars"></div>
+  </div>
+
+  <div class="trend-card">
+    <div class="trend-title">Répartition par objectif</div>
+    <div class="cat-breakdown" id="catBreakdown"></div>
+  </div>
+
+  <div class="filters" id="filterBar"></div>
+  <div class="gcards" id="gembaCards"></div>
+  <div class="empty" id="emptyState">
+    Aucun Gemba Walk enregistré.<br><br>
+    <button class="btn btn-primary" onclick="nouveauGemba()">Créer le premier Gemba</button>
   </div>
 </div>
+</div>
 
-<!-- ══════════ VUE RAPPORT ══════════ -->
+<!-- ════ RAPPORT ════ -->
 <div class="view" id="viewRapport">
-  <div class="wrapper">
+<div class="wrap">
 
-    <div class="rapp-header">
-      <div class="rapp-logo">Gemba</div>
-      <div class="rapp-title-block">
-        <h1>Rapport Gemba Walk</h1>
-        <p>Observation terrain · Management visuel &amp; amélioration continue</p>
-      </div>
-      <div class="rapp-badge">LEAN · Kaizen</div>
+  <div class="rapp-hero">
+    <div>
+      <h1>Rapport Gemba Walk</h1>
+      <p>Observation terrain · Management visuel · Amélioration continue</p>
     </div>
-
-    <!-- 0 Identification -->
-    <div class="card">
-      <div class="card-header"><div class="step-num">0</div><h2>Identification</h2><span class="card-icon">📋</span></div>
-      <div class="card-body">
-        <div class="field-row">
-          <div class="field"><label>Prénom <span class="req">*</span></label><input type="text" id="prenom" placeholder="Prénom du manager"></div>
-          <div class="field"><label>Nom <span class="req">*</span></label><input type="text" id="nom" placeholder="Nom du manager"></div>
-        </div>
-        <div class="field-row">
-          <div class="field"><label>Fonction</label><input type="text" id="fonction" placeholder="Ex : Responsable HSE, Chef d'équipe…"></div>
-          <div class="field"><label>Date <span class="req">*</span></label><input type="date" id="dateGemba"></div>
-        </div>
-        <div class="field-row three">
-          <div class="field"><label>Heure début</label><input type="time" id="heureDebut"></div>
-          <div class="field"><label>Heure fin</label><input type="time" id="heureFin"></div>
-          <div class="field"><label>Durée</label><input type="text" id="duree" readonly style="background:#f0f0ec;"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 1 Zone -->
-    <div class="card">
-      <div class="card-header"><div class="step-num">1</div><h2>Choisir &amp; tenir sa zone — Aller sur le terrain</h2><span class="card-icon">📍</span></div>
-      <div class="card-body">
-        <div class="tip-box">💡 <strong>Règle d'or :</strong> Rester dans la zone choisie pour toute la durée du Gemba. Ne pas se disperser. Le manager se rend là où le travail se fait réellement.</div>
-        <div class="field-row">
-          <div class="field">
-            <label>Lieu / Zone observée <span class="req">*</span></label>
-            <select id="lieu">
-              <option value="">— Sélectionner un lieu —</option>
-              <option>Atelier de production</option><option>Ligne d'assemblage</option>
-              <option>Zone de préparation de commandes</option><option>Entrepôt logistique</option>
-              <option>Quai de chargement / déchargement</option><option>Zone de contrôle qualité</option>
-              <option>Poste de maintenance</option><option>Bureau / Open space</option>
-              <option>Zone de stockage matières premières</option><option>Hangar / Zone aéronautique</option>
-              <option>Autre (préciser ci-dessous)</option>
-            </select>
-          </div>
-          <div class="field"><label>Précision de la zone</label><input type="text" id="lieuAutre" placeholder="Ex : Cellule MRO n°3, Baie 4…"></div>
-        </div>
-        <div class="field-row">
-          <div class="field">
-            <label>Objectif principal <span class="req">*</span></label>
-            <select id="objectif">
-              <option value="">— Sélectionner —</option>
-              <option>Réduire les temps d'attente</option><option>Comprendre les erreurs qualité</option>
-              <option>Observer un processus / identifier des erreurs</option>
-              <option>Améliorer la sécurité / identifier les risques</option>
-              <option>Réduire les difficultés opérateurs</option><option>Observer les flux et déplacements</option>
-              <option>Contrôle 5S / propreté / rangement</option><option>Audit EPI / culture sécurité</option>
-              <option>Autre (préciser)</option>
-            </select>
-          </div>
-          <div class="field"><label>Précision de l'objectif</label><input type="text" id="objectifAutre" placeholder="Description libre…"></div>
-        </div>
-        <div class="field-row full"><div class="field"><label>Périmètre exact &amp; limites</label><textarea class="short" id="perimetre" placeholder="Ex : Postes de soudure A1 à A4 uniquement, hors bureau de contrôle…"></textarea></div></div>
-        <div class="field-row full"><div class="field"><label>Collaborateurs rencontrés</label><textarea class="short" id="collaborateurs" placeholder="Ex : Jean – opérateur poste 3 ; Sophie – chef d'équipe…"></textarea></div></div>
-      </div>
-    </div>
-
-    <!-- 2 Observations -->
-    <div class="card">
-      <div class="card-header"><div class="step-num">2</div><h2>Observer avec œil &amp; oreille naïfs — Poser des questions</h2><span class="card-icon">👁️</span></div>
-      <div class="card-body">
-        <div class="tip-box">💡 <strong>Posture :</strong> Questions ouvertes, sans jugement. « Qu'est-ce qui… » cherche une cause. Ne jamais poser de questions coupabilisantes. Objectif : comprendre et améliorer, pas sanctionner.</div>
-        <div class="obs-list" id="obsList"></div>
-        <button class="btn-add" onclick="addObservation()">＋ Ajouter une observation</button>
-      </div>
-    </div>
-
-    <!-- 3 Opportunités -->
-    <div class="card">
-      <div class="card-header"><div class="step-num">3</div><h2>Identifier les opportunités d'amélioration</h2><span class="card-icon">🔍</span></div>
-      <div class="card-body">
-        <div class="tip-box">💡 On cherche : tâches inutiles, déplacements superflus, retards, doublons, causes d'erreurs. Quantifier dès que possible.</div>
-        <div class="field-row full"><div class="field"><label>Synthèse des gaspillages / dysfonctionnements</label><textarea class="tall" id="gaspillages" placeholder="Ex : 6 allers-retours/h pour récupérer des étiquettes (~40 m/trajet), document de suivi illisible car rempli debout…"></textarea></div></div>
-        <p style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:9px;">Valorisation de l'impact</p>
-        <div class="impact-grid">
-          <div class="impact-cell"><label>Temps perdu (min/j)</label><input type="text" id="impactTemps" placeholder="Ex : 45 min"></div>
-          <div class="impact-cell"><label>Distance inutile</label><input type="text" id="impactDistance" placeholder="Ex : 240 m/j"></div>
-          <div class="impact-cell"><label>Coût estimé (€/an)</label><input type="text" id="impactCout" placeholder="Ex : ~3 200 €"></div>
-          <div class="impact-cell"><label>Risques sécurité</label><input type="text" id="impactRisques" placeholder="Ex : 2 risques chute"></div>
-          <div class="impact-cell"><label>Impact fatigue</label><input type="text" id="impactFatigue" placeholder="Ex : Fatigue fin de poste"></div>
-          <div class="impact-cell"><label>Autres indicateurs</label><input type="text" id="impactAutre" placeholder="Ex : Taux erreur…"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 4 Plan d'actions -->
-    <div class="card">
-      <div class="card-header"><div class="step-num">4</div><h2>Plan d'actions — Quick Wins &amp; Suivi</h2><span class="card-icon">⚡</span></div>
-      <div class="card-body">
-        <div class="tip-box">💡 <strong>Règle :</strong> Maximum 1 à 2 Quick Win prioritaires. Mettre en place des améliorations concrètes, puis revenir vérifier avec l'équipe.</div>
-        <div class="quickwin-box">
-          <div class="quickwin-title">⭐ Quick Win N°1 — Priorité absolue</div>
-          <div class="field-row">
-            <div class="field"><label>Action à mener <span class="req">*</span></label><input type="text" id="qw1Action" placeholder="Ex : Déplacer l'imprimante au poste de préparation"></div>
-            <div class="field"><label>Responsable</label><input type="text" id="qw1Resp" placeholder="Prénom / Poste"></div>
-          </div>
-          <div class="field-row three">
-            <div class="field"><label>Délai</label><input type="date" id="qw1Delai"></div>
-            <div class="field"><label>Ressources nécessaires</label><input type="text" id="qw1Ressources" placeholder="Ex : Câble réseau…"></div>
-            <div class="field"><label>Coût estimé</label><input type="text" id="qw1Cout" placeholder="Ex : 50 €"></div>
-          </div>
-          <div class="field-row full"><div class="field"><label>Résultats attendus / Indicateur de succès</label><textarea class="short" id="qw1Resultats" placeholder="Ex : Suppression des 6 allers-retours/h → gain 45 min/j, −3 200 €/an…"></textarea></div></div>
-        </div>
-        <div class="quickwin-box">
-          <div class="quickwin-title">⭐ Quick Win N°2 — Si applicable</div>
-          <div class="field-row">
-            <div class="field"><label>Action à mener</label><input type="text" id="qw2Action" placeholder="Deuxième action quick win si nécessaire…"></div>
-            <div class="field"><label>Responsable</label><input type="text" id="qw2Resp" placeholder="Prénom / Poste"></div>
-          </div>
-          <div class="field-row three">
-            <div class="field"><label>Délai</label><input type="date" id="qw2Delai"></div>
-            <div class="field"><label>Ressources nécessaires</label><input type="text" id="qw2Ressources" placeholder="Ex : Formation, outil…"></div>
-            <div class="field"><label>Coût estimé</label><input type="text" id="qw2Cout" placeholder="Ex : 0 €"></div>
-          </div>
-          <div class="field-row full"><div class="field"><label>Résultats attendus</label><textarea class="short" id="qw2Resultats" placeholder="Résultats et indicateurs attendus…"></textarea></div></div>
-        </div>
-        <p style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:9px;">Actions complémentaires (moyen / long terme)</p>
-        <div id="actionList"></div>
-        <button class="btn-add" onclick="addAction()">＋ Ajouter une action complémentaire</button>
-        <div class="field-row" style="margin-top:14px;">
-          <div class="field"><label>Date de suivi prévue</label><input type="date" id="dateSuivi"></div>
-          <div class="field"><label>Modalités du suivi</label><input type="text" id="modaliteSuivi" placeholder="Ex : Point SQCDP, réunion équipe…"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Success Story -->
-    <div class="card">
-      <div class="card-header"><div class="step-num">✓</div><h2>Success Story — Avant / Après</h2><span class="card-icon">🏆</span></div>
-      <div class="card-body">
-        <div class="tip-box">💡 Valoriser les résultats et féliciter l'équipe. Le succès appartient aux opérateurs. À compléter après mise en œuvre.</div>
-        <div class="field-row">
-          <div class="field"><label>Situation AVANT</label><textarea class="tall" id="avant" placeholder="Situation initiale constatée lors du Gemba Walk…"></textarea></div>
-          <div class="field"><label>Situation APRÈS</label><textarea class="tall" id="apres" placeholder="Situation améliorée après mise en œuvre…"></textarea></div>
-        </div>
-        <div class="field-row">
-          <div class="field"><label>Gains mesurés</label><input type="text" id="gainsMesures" placeholder="Ex : −45 min/j, −240 m/j, −3 200 €/an…"></div>
-          <div class="field"><label>Félicitations équipe</label><input type="text" id="felicitations" placeholder="Ex : Merci à toute l'équipe Nuit…"></div>
-        </div>
-        <div class="field-row full"><div class="field"><label>Commentaires / Enseignements</label><textarea class="short" id="commentaires" placeholder="Retour d'expérience, leçons apprises, prochaines zones à observer…"></textarea></div></div>
-      </div>
-    </div>
-
-    <!-- Signature -->
-    <div class="card">
-      <div class="card-header"><div class="step-num">✍</div><h2>Validation</h2><span class="card-icon">📝</span></div>
-      <div class="card-body">
-        <div class="field-row">
-          <div class="field"><label>Signature du manager</label><input type="text" id="sigManager" placeholder="Nom complet"></div>
-          <div class="field"><label>Visa / Approbation N+1</label><input type="text" id="sigN1" placeholder="Nom du valideur si requis"></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="cta-bar">
-      <button class="btn-primary" onclick="sauvegarderEtImprimer()">🖨️ &nbsp;Enregistrer &amp; Imprimer PDF</button>
-      <button class="btn-primary" style="background:var(--accent2);" onclick="sauvegarderGemba(true)">💾 &nbsp;Enregistrer dans le tableau de bord</button>
-      <button class="btn-secondary" onclick="reinitialiser(true)">↺ &nbsp;Réinitialiser</button>
-    </div>
-
+    <div class="rapp-tag">LEAN · KAIZEN</div>
   </div>
-</div>
 
-<!-- ══ MODAL EDIT ══ -->
-<div class="modal-overlay" id="modalOverlay">
-  <div class="modal-box">
-    <div class="modal-header">
-      <h3>Modifier le Gemba Walk</h3>
-      <button class="modal-close" onclick="closeModal()">✕</button>
+  <!-- 0 Identification -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-head-icon" style="background:#fff7ed">0️⃣</div>
+      <h2>Identification</h2>
     </div>
-    <div class="modal-fields">
-      <div class="mfield-row">
-        <div class="mfield"><label>Prénom</label><input type="text" id="m_prenom"></div>
-        <div class="mfield"><label>Nom</label><input type="text" id="m_nom"></div>
+    <div class="card-body">
+      <div class="frow">
+        <div class="field"><div class="flabel">Prénom <span class="req">*</span></div><input type="text" id="prenom" placeholder="Prénom du manager"></div>
+        <div class="field"><div class="flabel">Nom <span class="req">*</span></div><input type="text" id="nom" placeholder="Nom du manager"></div>
       </div>
-      <div class="mfield">
-        <label>Zone observée</label>
-        <select id="m_zone">
-          <option value="">— Sélectionner —</option>
-          <option>Atelier de production</option><option>Ligne d'assemblage</option>
-          <option>Zone de préparation de commandes</option><option>Entrepôt logistique</option>
-          <option>Quai de chargement / déchargement</option><option>Zone de contrôle qualité</option>
-          <option>Poste de maintenance</option><option>Bureau / Open space</option>
-          <option>Zone de stockage matières premières</option><option>Hangar / Zone aéronautique</option>
-          <option>Autre</option>
-        </select>
+      <div class="frow">
+        <div class="field"><div class="flabel">Fonction</div><input type="text" id="fonction" placeholder="Ex : Responsable HSE…"></div>
+        <div class="field"><div class="flabel">Date <span class="req">*</span></div><input type="date" id="dateGemba"></div>
       </div>
-      <div class="mfield"><label>Précision zone</label><input type="text" id="m_zoneDetail" placeholder="Ex : Baie 4…"></div>
-      <div class="mfield-row">
-        <div class="mfield"><label>Date</label><input type="date" id="m_date"></div>
-        <div class="mfield"><label>Objectif</label>
-          <select id="m_objectif">
-            <option>Sécurité / EPI</option><option>Qualité / Erreurs</option>
-            <option>Flux / Déplacements</option><option>Temps d'attente</option>
-            <option>Ergonomie / TMS</option><option>5S / Propreté</option>
-            <option>Processus</option><option>Autre</option>
+      <div class="frow three">
+        <div class="field"><div class="flabel">Heure début</div><input type="time" id="heureDebut"></div>
+        <div class="field"><div class="flabel">Heure fin</div><input type="time" id="heureFin"></div>
+        <div class="field"><div class="flabel">Durée</div><input type="text" id="duree" readonly></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Checklist -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-head-icon" style="background:#f0fdf4">✅</div>
+      <h2>Checklist pré-Gemba</h2>
+      <span id="checkScore" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-left:auto;">0 / 5</span>
+    </div>
+    <div class="card-body">
+      <div class="checklist" id="checklist">
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text">J'ai choisi UNE zone et je m'y tiens pour toute la durée</div></div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text">Je suis en posture d'observation naïve — pas de jugement a priori</div></div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text">Mon objectif est clair : comprendre et améliorer, jamais sanctionner</div></div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text">Je vais poser des questions ouvertes bienveillantes (Qu'est-ce qui…)</div></div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text">Je suis prêt à écouter plus qu'à parler</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Timer -->
+  <div class="gemba-timer-bar">
+    <div>
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:4px;">Chronomètre Gemba</div>
+      <div class="gemba-timer-display inactive" id="timerDisplay">00:00:00</div>
+    </div>
+    <div id="timerProgressWrap" style="display:none;flex:1;max-width:200px;">
+      <div class="timer-progress-label"><span>Progression</span><span id="timerPct">0%</span></div>
+      <div class="prog"><div class="prog-fill" id="timerProg" style="width:0%"></div></div>
+      <div style="font-size:10px;color:var(--muted);margin-top:3px;" id="timerAlert"></div>
+    </div>
+    <div class="timer-controls">
+      <button class="btn btn-ghost btn-sm" id="btnStart" onclick="startTimer()">▶ Démarrer</button>
+      <button class="btn btn-ghost btn-sm" id="btnStop" onclick="stopTimer()" style="display:none;">⏹ Stop</button>
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('timerModal').classList.add('open')">⚙️</button>
+    </div>
+  </div>
+
+  <!-- 1 Zone -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-head-icon" style="background:#eff6ff">📍</div>
+      <h2>Zone &amp; Objectif</h2>
+    </div>
+    <div class="card-body">
+      <div class="tip"><div class="tip-icon">💡</div><div><strong>Règle d'or :</strong> Rester dans la zone choisie pour toute la durée. Le manager se rend là où le travail se fait réellement.</div></div>
+      <div class="frow">
+        <div class="field">
+          <div class="flabel">Lieu / Zone <span class="req">*</span></div>
+          <select id="lieu">
+            <option value="">— Sélectionner —</option>
+            <option>Atelier de production</option><option>Ligne d'assemblage</option>
+            <option>Zone de préparation de commandes</option><option>Entrepôt logistique</option>
+            <option>Quai de chargement / déchargement</option><option>Zone de contrôle qualité</option>
+            <option>Poste de maintenance</option><option>Bureau / Open space</option>
+            <option>Zone de stockage matières premières</option><option>Hangar / Zone aéronautique</option>
+            <option>Autre</option>
           </select>
         </div>
+        <div class="field"><div class="flabel">Précision zone</div><input type="text" id="lieuAutre" placeholder="Ex : Cellule MRO n°3, Baie 4…"></div>
       </div>
-      <div class="mfield"><label>Quick Win principal</label><input type="text" id="m_quickwin" placeholder="Action prioritaire définie…"></div>
-      <div class="mfield-row">
-        <div class="mfield"><label>Nb actions définies</label><input type="number" id="m_nbActions" min="0" max="99" value="0"></div>
-        <div class="mfield"><label>Nb actions réalisées</label><input type="number" id="m_nbDone" min="0" max="99" value="0"></div>
+      <div class="frow">
+        <div class="field">
+          <div class="flabel">Objectif <span class="req">*</span></div>
+          <select id="objectif">
+            <option value="">— Sélectionner —</option>
+            <option>Réduire les temps d'attente</option><option>Comprendre les erreurs qualité</option>
+            <option>Observer un processus</option><option>Améliorer la sécurité</option>
+            <option>Réduire les difficultés opérateurs</option><option>Observer les flux</option>
+            <option>Contrôle 5S / propreté</option><option>Audit EPI</option><option>Autre</option>
+          </select>
+        </div>
+        <div class="field"><div class="flabel">Précision objectif</div><input type="text" id="objectifAutre" placeholder="Description libre…"></div>
       </div>
-      <div class="mfield"><label>Date de suivi</label><input type="date" id="m_suivi"></div>
-      <div class="mfield"><label>Statut</label>
+      <div class="frow full"><div class="field"><div class="flabel">Périmètre exact</div><textarea class="short" id="perimetre" placeholder="Ex : Postes A1 à A4 uniquement…"></textarea></div></div>
+      <div class="frow full"><div class="field"><div class="flabel">Collaborateurs rencontrés</div><textarea class="short" id="collaborateurs" placeholder="Ex : Jean – opérateur poste 3 ; Sophie – chef d'équipe…"></textarea></div></div>
+    </div>
+  </div>
+
+  <!-- 2 Observations -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-head-icon" style="background:#faf5ff">👁️</div>
+      <h2>Observations terrain</h2>
+      <button class="btn btn-primary btn-sm" onclick="addObsNow()" style="margin-left:auto;">+ Noter maintenant</button>
+    </div>
+    <div class="card-body">
+      <div class="tip"><div class="tip-icon">💡</div><div><strong>Posture :</strong> Questions ouvertes sans jugement. « Qu'est-ce qui… » cherche une cause. Jamais de question coupabilisante.</div></div>
+      <div class="obs-list" id="obsList"></div>
+      <button class="btn btn-ghost" onclick="addObservation()" style="width:100%;margin-top:8px;justify-content:center;border-style:dashed;">＋ Ajouter une observation</button>
+    </div>
+  </div>
+
+  <!-- 3 Opportunités -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-head-icon" style="background:#fffbeb">🔍</div>
+      <h2>Opportunités d'amélioration</h2>
+    </div>
+    <div class="card-body">
+      <div class="frow full"><div class="field"><div class="flabel">Synthèse gaspillages / dysfonctionnements</div><textarea class="tall" id="gaspillages" placeholder="Tâches inutiles, déplacements superflus, retards, doublons, causes d'erreurs…"></textarea></div></div>
+      <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px;">Valorisation impact</p>
+      <div class="impact-grid">
+        <div class="impact-cell"><div class="flabel">Temps perdu</div><input type="text" id="impactTemps" placeholder="Ex : 45 min/j"></div>
+        <div class="impact-cell"><div class="flabel">Distance inutile</div><input type="text" id="impactDistance" placeholder="Ex : 240 m/j"></div>
+        <div class="impact-cell"><div class="flabel">Coût (€/an)</div><input type="text" id="impactCout" placeholder="Ex : ~3 200 €"></div>
+        <div class="impact-cell"><div class="flabel">Risques sécu.</div><input type="text" id="impactRisques" placeholder="Ex : 2 risques chute"></div>
+        <div class="impact-cell"><div class="flabel">Fatigue</div><input type="text" id="impactFatigue" placeholder="Ex : Fatigue fin poste"></div>
+        <div class="impact-cell"><div class="flabel">Autres</div><input type="text" id="impactAutre" placeholder="Ex : Taux erreur…"></div>
+      </div>
+      <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:14px 0 6px;">Matrice Quick Win — Impact vs Effort</p>
+      <canvas class="matrix-canvas" id="matrixCanvas"></canvas>
+      <div style="display:flex;gap:16px;font-size:10px;color:var(--muted2);margin-top:5px;justify-content:center;">
+        <span>⬅ Effort faible · fort ➡</span><span>·</span><span>⬇ Impact faible · fort ⬆</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4 Quick Wins -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-head-icon" style="background:#fffbeb">⚡</div>
+      <h2>Quick Wins &amp; Plan d'actions</h2>
+    </div>
+    <div class="card-body">
+      <div class="tip"><div class="tip-icon">💡</div><div>Maximum 1 à 2 Quick Win prioritaires. Agir vite, puis revenir mesurer les résultats avec l'équipe.</div></div>
+      <div class="qw-box">
+        <div class="qw-box-title">⭐ Quick Win N°1 — Priorité absolue</div>
+        <div class="frow">
+          <div class="field"><div class="flabel">Action <span class="req">*</span></div><input type="text" id="qw1Action" placeholder="Ex : Déplacer l'imprimante au poste…"></div>
+          <div class="field"><div class="flabel">Responsable</div><input type="text" id="qw1Resp" placeholder="Prénom / Poste"></div>
+        </div>
+        <div class="frow three">
+          <div class="field"><div class="flabel">Délai</div><input type="date" id="qw1Delai"></div>
+          <div class="field"><div class="flabel">Ressources</div><input type="text" id="qw1Ressources" placeholder="Ex : Câble réseau…"></div>
+          <div class="field"><div class="flabel">Coût estimé</div><input type="text" id="qw1Cout" placeholder="Ex : 50 €"></div>
+        </div>
+        <div class="frow full"><div class="field"><div class="flabel">Résultats attendus</div><textarea class="short" id="qw1Resultats" placeholder="Gain temps, sécurité, €/an…"></textarea></div></div>
+      </div>
+      <div class="qw-box">
+        <div class="qw-box-title">⭐ Quick Win N°2</div>
+        <div class="frow">
+          <div class="field"><div class="flabel">Action</div><input type="text" id="qw2Action" placeholder="Deuxième action si nécessaire…"></div>
+          <div class="field"><div class="flabel">Responsable</div><input type="text" id="qw2Resp" placeholder="Prénom / Poste"></div>
+        </div>
+        <div class="frow three">
+          <div class="field"><div class="flabel">Délai</div><input type="date" id="qw2Delai"></div>
+          <div class="field"><div class="flabel">Ressources</div><input type="text" id="qw2Ressources" placeholder="Ex : Formation…"></div>
+          <div class="field"><div class="flabel">Coût estimé</div><input type="text" id="qw2Cout" placeholder="Ex : 0 €"></div>
+        </div>
+        <div class="frow full"><div class="field"><div class="flabel">Résultats attendus</div><textarea class="short" id="qw2Resultats"></textarea></div></div>
+      </div>
+      <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px;">Actions complémentaires</p>
+      <div id="actionList"></div>
+      <button class="btn btn-ghost" onclick="addAction()" style="width:100%;justify-content:center;border-style:dashed;">＋ Ajouter une action</button>
+      <div class="frow" style="margin-top:12px;">
+        <div class="field"><div class="flabel">Date de suivi</div><input type="date" id="dateSuivi"></div>
+        <div class="field"><div class="flabel">Modalités</div><input type="text" id="modaliteSuivi" placeholder="Ex : Point SQCDP…"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success Story -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-head-icon" style="background:#f0fdf4">🏆</div>
+      <h2>Success Story — Avant / Après</h2>
+    </div>
+    <div class="card-body">
+      <div class="aa-grid">
+        <div class="aa-box avant">
+          <div class="aa-label">🔴 Avant</div>
+          <textarea class="tall" id="avant" placeholder="Situation initiale constatée…"></textarea>
+        </div>
+        <div class="aa-box apres">
+          <div class="aa-label">🟢 Après</div>
+          <textarea class="tall" id="apres" placeholder="Situation après amélioration…"></textarea>
+        </div>
+      </div>
+      <div class="frow">
+        <div class="field"><div class="flabel">Gains mesurés</div><input type="text" id="gainsMesures" placeholder="Ex : −45 min/j, −3 200 €/an…"></div>
+        <div class="field"><div class="flabel">Félicitations équipe</div><input type="text" id="felicitations" placeholder="Ex : Merci à l'équipe Nuit…"></div>
+      </div>
+      <div class="frow full"><div class="field"><div class="flabel">Commentaires / Enseignements</div><textarea class="short" id="commentaires" placeholder="Leçons apprises, prochaines zones…"></textarea></div></div>
+    </div>
+  </div>
+
+  <!-- Validation -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-head-icon" style="background:#faf5ff">✍️</div>
+      <h2>Validation &amp; Signature</h2>
+    </div>
+    <div class="card-body">
+      <div class="frow">
+        <div class="field"><div class="flabel">Signature manager</div><input type="text" id="sigManager" placeholder="Nom complet"></div>
+        <div class="field"><div class="flabel">Visa N+1</div><input type="text" id="sigN1" placeholder="Valideur si requis"></div>
+      </div>
+      <div class="frow">
+        <div class="field"><div class="flabel">Signature opérateur (opt.)</div><input type="text" id="sigOperateur" placeholder="Nom de l'opérateur concerné"></div>
+        <div class="field"><div class="flabel">Date signature</div><input type="date" id="dateSig"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cta-bar">
+    <button class="btn btn-primary" onclick="sauvegarderEtImprimer()">🖨️ Enregistrer &amp; PDF</button>
+    <button class="btn btn-blue" onclick="sauvegarderGemba(true)">💾 Sauvegarder</button>
+    <button class="btn btn-ghost" onclick="modePresentation()">📊 Présenter</button>
+    <button class="btn btn-ghost" onclick="partagerRapport()">📤 Partager</button>
+    <button class="btn btn-danger" onclick="reinitialiser(true)">↺ Reset</button>
+  </div>
+
+</div>
+</div>
+
+<!-- ════ ANALYSE ════ -->
+<div class="view" id="viewStats">
+<div class="wrap">
+  <div style="margin-bottom:18px;">
+    <h2 style="font-family:'Syne',sans-serif;font-size:26px;font-weight:800;letter-spacing:-.03em;">Analyse</h2>
+    <p style="font-size:13px;color:var(--muted);margin-top:3px;">Vue d'ensemble de vos Gemba Walks</p>
+  </div>
+  <div id="statsDetailed"></div>
+</div>
+</div>
+
+</div><!-- /views -->
+
+<!-- MODAL EDIT -->
+<div class="modal-bg" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-head"><h3>Modifier le Gemba Walk</h3><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div class="frow"><div class="field"><div class="flabel">Prénom</div><input type="text" id="m_prenom"></div><div class="field"><div class="flabel">Nom</div><input type="text" id="m_nom"></div></div>
+      <div class="field"><div class="flabel">Zone</div>
+        <select id="m_zone"><option value="">—</option><option>Atelier de production</option><option>Ligne d'assemblage</option><option>Zone de préparation de commandes</option><option>Entrepôt logistique</option><option>Quai de chargement / déchargement</option><option>Zone de contrôle qualité</option><option>Poste de maintenance</option><option>Bureau / Open space</option><option>Zone de stockage matières premières</option><option>Hangar / Zone aéronautique</option><option>Autre</option></select>
+      </div>
+      <div class="field"><div class="flabel">Précision zone</div><input type="text" id="m_zoneDetail"></div>
+      <div class="frow">
+        <div class="field"><div class="flabel">Date</div><input type="date" id="m_date"></div>
+        <div class="field"><div class="flabel">Objectif</div>
+          <select id="m_objectif"><option>Sécurité / EPI</option><option>Qualité / Erreurs</option><option>Flux / Déplacements</option><option>Temps d'attente</option><option>Ergonomie / TMS</option><option>5S / Propreté</option><option>Processus</option><option>Autre</option></select>
+        </div>
+      </div>
+      <div class="field"><div class="flabel">Quick Win principal</div><input type="text" id="m_quickwin"></div>
+      <div class="frow">
+        <div class="field"><div class="flabel">Actions définies</div><input type="number" id="m_nbActions" min="0" max="99" value="0"></div>
+        <div class="field"><div class="flabel">Actions réalisées</div><input type="number" id="m_nbDone" min="0" max="99" value="0"></div>
+      </div>
+      <div class="field"><div class="flabel">Date de suivi</div><input type="date" id="m_suivi"></div>
+      <div class="field"><div class="flabel">Statut</div>
         <select id="m_statut">
           <option value="en_cours">En cours — actions à finaliser</option>
-          <option value="a_suivre">À suivre — en attente de résultats</option>
+          <option value="a_suivre">À suivre — en attente résultats</option>
           <option value="termine">Terminé — succès story validée</option>
         </select>
       </div>
-      <div class="mfield"><label>Notes</label><textarea id="m_notes" placeholder="Observations, points de vigilance…"></textarea></div>
+      <div class="field"><div class="flabel">Notes</div><textarea id="m_notes" class="short"></textarea></div>
     </div>
-    <div class="modal-footer">
-      <button class="btn-secondary" onclick="closeModal()" style="padding:9px 18px;font-size:13px;">Annuler</button>
-      <button class="btn-primary" onclick="saveModal()" style="padding:9px 18px;font-size:13px;">Mettre à jour</button>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal()">Annuler</button>
+      <button class="btn btn-primary" onclick="saveModal()">Mettre à jour</button>
     </div>
   </div>
 </div>
 
+<!-- MODAL TIMER CONFIG -->
+<div class="modal-bg" id="timerModal">
+  <div class="modal" style="max-width:340px;">
+    <div class="modal-head"><h3>⏱ Timer Gemba</h3><button class="modal-close" onclick="document.getElementById('timerModal').classList.remove('open')">✕</button></div>
+    <div class="field">
+      <div class="flabel">Durée prévue (minutes)</div>
+      <input type="number" id="timerDuration" value="60" min="5" max="480">
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="document.getElementById('timerModal').classList.remove('open')">Annuler</button>
+      <button class="btn btn-primary" onclick="saveTimerConfig()">Confirmer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODE PRÉSENTATION -->
+<div class="pres-overlay" id="presOverlay">
+  <button class="btn btn-ghost pres-close" onclick="document.getElementById('presOverlay').classList.remove('open')">✕ Fermer</button>
+  <div class="pres-content" id="presContent"></div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
 <script>
 /* ── NAV ── */
-function showView(name, tab) {
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('view' + name.charAt(0).toUpperCase() + name.slice(1)).classList.add('active');
-  if (tab) tab.classList.add('active');
-  if (name === 'dashboard') renderDashboard();
+function showView(name,tab){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('view'+name).classList.add('active');
+  if(tab)tab.classList.add('active');
+  if(name==='Dashboard')renderDashboard();
+  if(name==='Stats')renderStats();
 }
-
-function nouveauGemba() {
-  reinitialiser(false);
-  showView('rapport', document.getElementById('tabRapp'));
-}
+function nouveauGemba(){reinitialiser(false);showView('Rapport',document.getElementById('tabRapp'));}
 
 /* ── STORAGE ── */
-const STOR = 'gemba_v3';
-let gembaData = [];
-let editId = null;
-let activeFilter = 'all';
+const STOR='gemba_v5';
+let gembaData=[],editId=null,activeFilter='all';
+function loadData(){try{gembaData=JSON.parse(localStorage.getItem(STOR)||'[]');}catch(e){gembaData=[];}}
+function saveData(){try{localStorage.setItem(STOR,JSON.stringify(gembaData));}catch(e){}}
+function fmtDate(s){if(!s)return'—';const[y,m,d]=s.split('-');return`${d}/${m}/${y}`;}
+function nowTime(){const n=new Date();return`${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;}
+function getWeek(d){const s=new Date(d.getFullYear(),0,1);return Math.ceil((((d-s)/86400000)+s.getDay()+1)/7);}
 
-function loadData()  { try { gembaData = JSON.parse(localStorage.getItem(STOR) || '[]'); } catch(e) { gembaData = []; } }
-function saveData()  { try { localStorage.setItem(STOR, JSON.stringify(gembaData)); } catch(e) {} }
-function fmtDate(s)  { if (!s) return '—'; const [y,m,d] = s.split('-'); return `${d}/${m}/${y}`; }
-
-/* ── DASHBOARD ── */
-function renderDashboard() {
-  loadData();
-  const t  = gembaData.length;
-  const ec = gembaData.filter(g => g.statut==='en_cours').length;
-  const as = gembaData.filter(g => g.statut==='a_suivre').length;
-  const te = gembaData.filter(g => g.statut==='termine').length;
-  const ta = gembaData.reduce((s,g)=>s+(+g.nbActions||0),0);
-  const td = gembaData.reduce((s,g)=>s+(+g.nbDone||0),0);
-
-  document.getElementById('statsGrid').innerHTML = `
-    <div class="stat-card"><div class="stat-label">Total Gemba</div><div class="stat-val">${t}</div></div>
-    <div class="stat-card warn"><div class="stat-label">En cours</div><div class="stat-val">${ec}</div></div>
-    <div class="stat-card info"><div class="stat-label">À suivre</div><div class="stat-val">${as}</div></div>
-    <div class="stat-card ok"><div class="stat-label">Terminés</div><div class="stat-val">${te}</div></div>
-    <div class="stat-card"><div class="stat-label">Actions faites</div><div class="stat-val">${td}<span style="font-size:14px;color:var(--muted);">/${ta}</span></div></div>
-  `;
-
-  const fs = [{id:'all',l:'Tous'},{id:'en_cours',l:'⏳ En cours'},{id:'a_suivre',l:'👁 À suivre'},{id:'termine',l:'✅ Terminés'}];
-  document.getElementById('filterBar').innerHTML = fs.map(f =>
-    `<button class="filter-btn${activeFilter===f.id?' active':''}" onclick="setFilter('${f.id}')">${f.l}</button>`
-  ).join('');
-
-  renderCards();
+function toast(msg,type=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className=`toast ${type} show`;
+  setTimeout(()=>t.classList.remove('show'),2800);
 }
 
-function setFilter(f) { activeFilter = f; renderDashboard(); }
-
-function renderCards() {
-  const filtered = activeFilter==='all' ? gembaData : gembaData.filter(g=>g.statut===activeFilter);
-  const sorted = [...filtered].sort((a,b)=>{
-    const o={en_cours:0,a_suivre:1,termine:2};
-    return (o[a.statut]||0)-(o[b.statut]||0)||(b.date||'').localeCompare(a.date||'');
-  });
-
-  const empty = document.getElementById('emptyState');
-  const list  = document.getElementById('gembaCards');
-  if (!sorted.length) { empty.style.display='block'; list.innerHTML=''; return; }
-  empty.style.display='none';
-
-  const stCfg = { en_cours:{l:'En cours',c:'en_cours'}, a_suivre:{l:'À suivre',c:'a_suivre'}, termine:{l:'Terminé',c:'termine'} };
-
-  list.innerHTML = sorted.map(g => {
-    const st = stCfg[g.statut]||stCfg.en_cours;
-    const isR = g.statut==='en_cours' && g.suivi && new Date(g.suivi)<new Date();
-    const nb  = +g.nbActions||0;
-    const dn  = Math.min(+g.nbDone||0, nb);
-    const pct = nb ? Math.round((dn/nb)*100) : null;
-    const zone = g.zoneDetail ? `${g.zone} — ${g.zoneDetail}` : (g.zone||'—');
-    return `
-    <div class="gemba-card st-${g.statut}${isR?' retard':''}">
-      <div class="gc-top">
-        <div>
-          <div class="gc-name">${g.prenom||''} ${g.nom||''}</div>
-          <div class="gc-meta">📍 ${zone} &nbsp;·&nbsp; 🎯 ${g.objectif||'—'} &nbsp;·&nbsp; 📅 ${fmtDate(g.date)}</div>
-        </div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;">
-          <div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;">
-            <span class="badge-st ${st.c}">${st.l}</span>
-            ${isR?'<span class="badge-retard">Suivi en retard</span>':''}
-          </div>
-          <div class="gc-actions">
-            <button class="gc-btn open-r" onclick="ouvrirRapport('${g.id}')">📝 Rapport</button>
-            <button class="gc-btn" onclick="openModal('${g.id}')">✏️ Modifier</button>
-            <button class="gc-btn danger" onclick="delGemba('${g.id}')">🗑</button>
-          </div>
-        </div>
-      </div>
-      ${g.quickwin?`<div class="gc-qw"><span class="qw-label">Quick Win</span><span>${g.quickwin}</span></div>`:''}
-      ${pct!==null?`
-        <div class="prog-bar-label"><span>Actions réalisées</span><span>${dn} / ${nb}</span></div>
-        <div class="prog-bar"><div class="prog-bar-fill${pct===100?' done':''}" style="width:${pct}%"></div></div>
-      `:''}
-      <div class="gc-footer">
-        ${g.suivi?`<span>🔁 Suivi le ${fmtDate(g.suivi)}</span>`:''}
-        ${g.notes?`<span style="font-style:italic;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:340px;">${g.notes}</span>`:''}
-      </div>
-    </div>`;
-  }).join('');
+/* ── CHECKLIST ── */
+function toggleCheck(el){
+  el.classList.toggle('checked');
+  const done=document.querySelectorAll('.check-item.checked').length;
+  const total=document.querySelectorAll('.check-item').length;
+  document.getElementById('checkScore').textContent=`${done} / ${total}`;
+  el.querySelector('.check-box').textContent=el.classList.contains('checked')?'✓':'';
+  if(done===total)toast('✅ Checklist complète — bon Gemba !','success');
 }
 
-function delGemba(id) {
-  if (!confirm('Supprimer ce Gemba Walk définitivement ?')) return;
-  gembaData = gembaData.filter(g=>g.id!==id);
-  saveData(); renderDashboard();
+/* ── TIMER ── */
+let timerInterval=null,timerStart=null,timerDuration=60,timerRunning=false,halfAlerted=false;
+
+function saveTimerConfig(){
+  timerDuration=+document.getElementById('timerDuration').value||60;
+  document.getElementById('timerModal').classList.remove('open');
+  toast(`Timer configuré : ${timerDuration} min`);
 }
 
-/* ── MODAL ── */
-function openModal(id) {
-  editId = id;
-  const g = gembaData.find(x=>x.id===id); if (!g) return;
-  ['prenom','nom','zoneDetail','quickwin','notes'].forEach(k => document.getElementById('m_'+k).value = g[k]||'');
-  ['date','suivi'].forEach(k => document.getElementById('m_'+k).value = g[k]||'');
-  ['zone','objectif','statut'].forEach(k => document.getElementById('m_'+k).value = g[k]||'');
-  document.getElementById('m_nbActions').value = g.nbActions||0;
-  document.getElementById('m_nbDone').value    = g.nbDone||0;
-  document.getElementById('modalOverlay').classList.add('open');
+function startTimer(){
+  timerStart=Date.now();timerRunning=true;halfAlerted=false;
+  document.getElementById('timerDisplay').classList.remove('inactive');
+  document.getElementById('btnStart').style.display='none';
+  document.getElementById('btnStop').style.display='';
+  document.getElementById('timerProgressWrap').style.display='';
+  document.getElementById('navTimer').classList.add('running');
+  timerInterval=setInterval(updateTimer,1000);
+  const n=new Date();
+  document.getElementById('heureDebut').value=`${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;
+  toast('▶ Gemba démarré !');
 }
 
-function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
-
-function saveModal() {
-  const g = gembaData.find(x=>x.id===editId); if (!g) return;
-  ['prenom','nom','zoneDetail','quickwin','notes'].forEach(k => g[k] = document.getElementById('m_'+k).value.trim());
-  ['date','suivi','zone','objectif','statut'].forEach(k => g[k] = document.getElementById('m_'+k).value);
-  g.nbActions = +document.getElementById('m_nbActions').value||0;
-  g.nbDone    = +document.getElementById('m_nbDone').value||0;
-  saveData(); closeModal(); renderDashboard();
+function stopTimer(){
+  if(timerInterval)clearInterval(timerInterval);
+  timerRunning=false;
+  document.getElementById('btnStart').style.display='';
+  document.getElementById('btnStop').style.display='none';
+  document.getElementById('navTimer').classList.remove('running');
+  const n=new Date();
+  document.getElementById('heureFin').value=`${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;
+  calcDuree();toast('⏹ Gemba terminé');
 }
 
-document.getElementById('modalOverlay').addEventListener('click', e => {
-  if (e.target===document.getElementById('modalOverlay')) closeModal();
-});
+function updateTimer(){
+  const el=Math.floor((Date.now()-timerStart)/1000);
+  const h=Math.floor(el/3600),m=Math.floor((el%3600)/60),s=el%60;
+  const str=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  document.getElementById('timerDisplay').textContent=str;
+  document.getElementById('navTimerVal').textContent=str;
+  const tot=timerDuration*60,pct=Math.min(100,Math.round((el/tot)*100));
+  document.getElementById('timerProg').style.width=pct+'%';
+  document.getElementById('timerProg').className='prog-fill'+(pct>=100?' done':'');
+  document.getElementById('timerPct').textContent=pct+'%';
+  const rem=Math.max(0,tot-el);
+  const rm=Math.floor(rem/60),rs=rem%60;
+  document.getElementById('timerAlert').textContent=rem>0?`Reste ${rm}m${String(rs).padStart(2,'0')}s`:'Temps dépassé';
+  if(el===Math.floor(tot/2)&&!halfAlerted){halfAlerted=true;toast(`⚠️ Mi-temps — ${Math.floor(timerDuration/2)} min écoulées`,'warn');}
+  if(el>=tot&&el<tot+3)toast('🔔 Temps Gemba écoulé !','warn');
+}
 
-/* ── RAPPORT — CHAMPS DYNAMIQUES ── */
-let obsCount = 0, actCount = 0;
-const cats = [
+/* ── OBSERVATIONS ── */
+let obsCount=0,actCount=0;
+const CATS=[
   {v:'securite',l:'🔴 Sécurité / EPI'},{v:'qualite',l:'🟠 Qualité / Erreur'},
-  {v:'deplacement',l:'🟡 Déplacement inutile'},{v:'attente',l:'🔵 Attente / Ralentissement'},
+  {v:'deplacement',l:'🟡 Déplacement inutile'},{v:'attente',l:'🔵 Attente / Lenteur'},
   {v:'ergonomie',l:'🟣 Ergonomie / TMS'},{v:'proprete',l:'⚫ Propreté / 5S'},
   {v:'outil',l:'⚙️ Outil / Équipement'},{v:'process',l:'📄 Procédure / Process'},{v:'autre',l:'⬜ Autre'},
 ];
+const BAD_Q=['pourquoi tu ne','pourquoi vous ne','pourquoi tu n\'','c\'est quoi ton problème','tu fais toujours','vous faites toujours','pourquoi la ls est sale','pourquoi tu ne portes pas'];
 
-function addObservation() {
-  obsCount++;
-  const div = document.createElement('div');
-  div.className='obs-item'; div.id=`obs_${obsCount}`;
-  div.innerHTML=`
-    <div class="obs-item-header"><span class="obs-num">Observation #${obsCount}</span><button class="btn-remove" onclick="removeItem('obs_${obsCount}')">✕ Supprimer</button></div>
-    <div class="obs-grid">
-      <div class="field"><label>Catégorie</label><select>${cats.map(c=>`<option value="${c.v}">${c.l}</option>`).join('')}</select></div>
-      <div class="field"><label>Localisation précise</label><input type="text" placeholder="Ex : Poste n°3, allée B…"></div>
-      <div class="field full"><label>Constat factuel</label><textarea class="short" placeholder="Décrire objectivement la situation constatée, sans jugement…"></textarea></div>
-      <div class="field full"><label>Question posée à l'opérateur (bienveillante)</label><textarea class="short" placeholder="Ex : Qu'est-ce qui t'empêche de porter tes gants ? / Qu'est-ce qui te fait perdre du temps ici ?"></textarea></div>
-      <div class="field full"><label>Réponse / Explication de l'opérateur</label><textarea class="short" placeholder="Ce que l'opérateur a expliqué — c'est souvent là que se cache la vraie cause…"></textarea></div>
-    </div>`;
-  document.getElementById('obsList').appendChild(div);
+function checkBadQ(ta){
+  const v=ta.value.toLowerCase();
+  const w=ta.closest('.obs-item-body').querySelector('.q-warn');
+  if(!w)return;
+  w.classList.toggle('show',BAD_Q.some(p=>v.includes(p)));
 }
 
-function addAction() {
-  actCount++;
-  const div = document.createElement('div');
-  div.className='action-item'; div.id=`act_${actCount}`;
+function addObsNow(){
+  addObservation();
+  const items=document.querySelectorAll('.obs-item');
+  items[items.length-1]?.scrollIntoView({behavior:'smooth',block:'center'});
+  toast('📝 Observation — '+nowTime());
+}
+
+function addObservation(){
+  obsCount++;
+  const t=nowTime(),id=`obs_${obsCount}`;
+  const div=document.createElement('div');
+  div.className='obs-item';div.id=id;
   div.innerHTML=`
-    <div class="obs-item-header" style="margin-bottom:8px;"><span class="obs-num">Action complémentaire #${actCount}</span><button class="btn-remove" onclick="removeItem('act_${actCount}')">✕ Supprimer</button></div>
-    <div class="action-grid">
-      <div class="field"><label>Description</label><input type="text" placeholder="Action à mener…"></div>
-      <div class="field"><label>Responsable</label><input type="text" placeholder="Prénom / Poste"></div>
-      <div class="field"><label>Échéance</label><input type="date"></div>
-      <div class="field"><label>Priorité</label><select><option>Moyen terme (1-3 mois)</option><option>Long terme (3-6 mois)</option><option>En étude</option></select></div>
-      <div class="field" style="grid-column:2/-1;"><label>Indicateur de succès</label><input type="text" placeholder="Comment mesurerons-nous le succès ?"></div>
+    <div class="obs-item-head">
+      <span class="obs-time">${t}</span>
+      <span class="obs-elapsed" id="el_${obsCount}"></span>
+      <button class="btn-icon" onclick="removeItem('${id}')" style="margin-left:auto;font-size:11px;">✕</button>
+    </div>
+    <div class="obs-item-body">
+      <div class="field"><div class="flabel">Catégorie</div><select>${CATS.map(c=>`<option value="${c.v}">${c.l}</option>`).join('')}</select></div>
+      <div class="field"><div class="flabel">Localisation</div><input type="text" placeholder="Ex : Poste n°3, allée B…"></div>
+      <div class="field full"><div class="flabel">Constat factuel</div><textarea class="short" placeholder="Décrire objectivement la situation — sans jugement…"></textarea></div>
+      <div class="field full">
+        <div class="flabel">Question posée (bienveillante)</div>
+        <textarea class="short" placeholder="Ex : Qu'est-ce qui t'empêche de… / Qu'est-ce qui te fait perdre du temps ici ?" oninput="checkBadQ(this)"></textarea>
+        <div class="q-warn">⚠️ Question potentiellement coupabilisante — reformulez avec « Qu'est-ce qui… »</div>
+      </div>
+      <div class="field full"><div class="flabel">Réponse / Explication opérateur</div><textarea class="short" placeholder="Ce que l'opérateur a expliqué — souvent là que se cache la vraie cause…"></textarea></div>
+      <div class="field full">
+        <div class="flabel">📷 Photos</div>
+        <div class="photo-zone">
+          <input type="file" accept="image/*" multiple onchange="handlePhotos(this,'ph_${obsCount}')">
+          <p>Appuyer pour ajouter une photo</p>
+        </div>
+        <div class="photo-preview" id="ph_${obsCount}"></div>
+      </div>
+      <div class="field full">
+        <div class="flabel">Score observation</div>
+        <div class="scoring-grid">
+          <div><div class="score-label">Impact</div><div class="score-stars" id="imp_${obsCount}">${[1,2,3,4,5].map(i=>`<div class="star" onclick="setStar('imp_${obsCount}',${i})">☆</div>`).join('')}</div></div>
+          <div><div class="score-label">Facilité résolution</div><div class="score-stars" id="eas_${obsCount}">${[1,2,3,4,5].map(i=>`<div class="star" onclick="setStar('eas_${obsCount}',${i})">☆</div>`).join('')}</div></div>
+        </div>
+      </div>
+    </div>`;
+  document.getElementById('obsList').appendChild(div);
+  updateElapsed();
+}
+
+function handlePhotos(input,cid){
+  const c=document.getElementById(cid);
+  Array.from(input.files).forEach(f=>{
+    const r=new FileReader();
+    r.onload=e=>{const img=document.createElement('img');img.className='photo-thumb';img.src=e.target.result;c.appendChild(img);};
+    r.readAsDataURL(f);
+  });
+}
+
+function setStar(id,val){
+  document.getElementById(id).querySelectorAll('.star').forEach((s,i)=>{
+    s.classList.toggle('on',i<val);s.textContent=i<val?'★':'☆';
+  });
+}
+
+function updateElapsed(){
+  const items=document.querySelectorAll('.obs-item');
+  items.forEach((item,i)=>{
+    if(!i)return;
+    const pt=items[i-1].querySelector('.obs-time')?.textContent;
+    const ct=item.querySelector('.obs-time')?.textContent;
+    if(pt&&ct){
+      const[ph,pm]=pt.split(':').map(Number),[ch,cm]=ct.split(':').map(Number);
+      const diff=(ch*60+cm)-(ph*60+pm);
+      const el=item.querySelector('.obs-elapsed');
+      if(el&&diff>=0)el.textContent=`+${diff}min`;
+    }
+  });
+}
+
+function addAction(){
+  actCount++;
+  const div=document.createElement('div');
+  div.id=`act_${actCount}`;
+  div.style.cssText='background:var(--surface2);border:1px solid var(--border);border-radius:var(--r2);padding:12px;margin-bottom:8px;';
+  div.innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <span style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.08em;">Action #${actCount}</span>
+      <button class="btn-icon btn-sm" onclick="removeItem('act_${actCount}')">✕</button>
+    </div>
+    <div class="frow three">
+      <div class="field"><div class="flabel">Description</div><input type="text" placeholder="Action à mener…"></div>
+      <div class="field"><div class="flabel">Responsable</div><input type="text" placeholder="Prénom / Poste"></div>
+      <div class="field"><div class="flabel">Échéance</div><input type="date"></div>
+    </div>
+    <div class="frow">
+      <div class="field"><div class="flabel">Priorité</div><select><option>Moyen terme (1-3 mois)</option><option>Long terme (3-6 mois)</option><option>En étude</option></select></div>
+      <div class="field"><div class="flabel">Indicateur succès</div><input type="text" placeholder="Comment mesurer ?"></div>
     </div>`;
   document.getElementById('actionList').appendChild(div);
 }
 
-function removeItem(id) { document.getElementById(id)?.remove(); }
+function removeItem(id){document.getElementById(id)?.remove();}
 
 /* ── DURÉE AUTO ── */
-['heureDebut','heureFin'].forEach(id => document.getElementById(id).addEventListener('change', () => {
-  const d=document.getElementById('heureDebut').value, f=document.getElementById('heureFin').value;
-  if (!d||!f) return;
-  const [dh,dm]=d.split(':').map(Number), [fh,fm]=f.split(':').map(Number);
-  let diff=(fh*60+fm)-(dh*60+dm); if(diff<0)diff+=1440;
+['heureDebut','heureFin'].forEach(id=>document.getElementById(id).addEventListener('change',calcDuree));
+function calcDuree(){
+  const d=document.getElementById('heureDebut').value,f=document.getElementById('heureFin').value;
+  if(!d||!f)return;
+  const[dh,dm]=d.split(':').map(Number),[fh,fm]=f.split(':').map(Number);
+  let diff=(fh*60+fm)-(dh*60+dm);if(diff<0)diff+=1440;
   document.getElementById('duree').value=`${Math.floor(diff/60)}h${String(diff%60).padStart(2,'0')}`;
-}));
+}
+
+/* ── MATRICE ── */
+function initMatrix(){
+  const canvas=document.getElementById('matrixCanvas');if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  canvas.width=canvas.offsetWidth||700;canvas.height=190;
+  const w=canvas.width,h=canvas.height;
+  ctx.fillStyle='#f5f6f8';ctx.fillRect(0,0,w,h);
+  ctx.fillStyle='rgba(22,163,74,.08)';ctx.fillRect(0,0,w/2,h/2);
+  ctx.fillStyle='rgba(220,38,38,.06)';ctx.fillRect(w/2,0,w/2,h/2);
+  ctx.fillStyle='rgba(37,99,235,.06)';ctx.fillRect(0,h/2,w/2,h/2);
+  ctx.fillStyle='rgba(156,163,175,.08)';ctx.fillRect(w/2,h/2,w/2,h/2);
+  ctx.font='10px Instrument Sans';ctx.fillStyle='rgba(0,0,0,.35)';
+  ctx.fillText('⭐ Quick Win',6,13);ctx.fillText('À étudier',w/2+6,13);
+  ctx.fillText('Déprioritiser',6,h-5);ctx.fillText('Long terme',w/2+6,h-5);
+  ctx.strokeStyle='rgba(0,0,0,.1)';
+  ctx.beginPath();ctx.moveTo(w/2,0);ctx.lineTo(w/2,h);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(0,h/2);ctx.lineTo(w,h/2);ctx.stroke();
+  canvas.onclick=e=>{
+    const rect=canvas.getBoundingClientRect();
+    const x=(e.clientX-rect.left)*(w/rect.width),y=(e.clientY-rect.top)*(h/rect.height);
+    ctx.beginPath();ctx.arc(x,y,5,0,Math.PI*2);
+    ctx.fillStyle='#e8532a';ctx.fill();
+    ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();ctx.lineWidth=1;
+  };
+}
 
 /* ── SAUVEGARDER ── */
-function sauvegarderGemba(notify) {
+function sauvegarderGemba(notify){
   loadData();
-  const prenom = document.getElementById('prenom').value.trim();
-  const nom    = document.getElementById('nom').value.trim();
-  if (!prenom && !nom) { alert('Veuillez renseigner le prénom et le nom du manager avant de sauvegarder.'); return false; }
-  const g = {
-    id:         Date.now().toString(36)+Math.random().toString(36).slice(2,5),
-    prenom, nom,
-    zone:       document.getElementById('lieu').value,
-    zoneDetail: document.getElementById('lieuAutre').value.trim(),
-    date:       document.getElementById('dateGemba').value,
-    objectif:   document.getElementById('objectif').value || document.getElementById('objectifAutre').value || '—',
-    quickwin:   document.getElementById('qw1Action').value.trim(),
-    nbActions:  0, nbDone: 0,
-    suivi:      document.getElementById('dateSuivi').value,
-    statut:     'en_cours',
-    notes:      document.getElementById('commentaires').value.trim(),
+  const prenom=document.getElementById('prenom').value.trim();
+  const nom=document.getElementById('nom').value.trim();
+  if(!prenom&&!nom){toast('⚠️ Renseignez le nom du manager','warn');return false;}
+  const g={
+    id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),
+    prenom,nom,
+    zone:document.getElementById('lieu').value,
+    zoneDetail:document.getElementById('lieuAutre').value.trim(),
+    date:document.getElementById('dateGemba').value,
+    objectif:document.getElementById('objectif').value||document.getElementById('objectifAutre').value||'—',
+    quickwin:document.getElementById('qw1Action').value.trim(),
+    nbActions:0,nbDone:0,
+    nbObs:document.querySelectorAll('.obs-item').length,
+    suivi:document.getElementById('dateSuivi').value,
+    statut:'en_cours',
+    notes:document.getElementById('commentaires').value.trim(),
+    savedAt:new Date().toISOString(),
   };
-  gembaData.unshift(g); saveData();
-  if (notify) alert(`✅ Gemba de ${prenom} ${nom} enregistré dans le tableau de bord !`);
+  gembaData.unshift(g);saveData();
+  if(notify)toast(`✅ Gemba de ${prenom} ${nom} sauvegardé !`,'success');
   return true;
 }
 
-function sauvegarderEtImprimer() {
-  if (!sauvegarderGemba(false)) return;
-  const p=document.getElementById('prenom').value, n=document.getElementById('nom').value, d=document.getElementById('dateGemba').value;
-  document.title=`Gemba Walk - ${p} ${n} - ${d||'sans date'}`;
+function sauvegarderEtImprimer(){
+  if(!sauvegarderGemba(false))return;
+  const p=document.getElementById('prenom').value,n=document.getElementById('nom').value;
+  document.title=`Gemba Walk - ${p} ${n} - ${document.getElementById('dateGemba').value||''}`;
   window.print();
 }
 
-/* ── OUVRIR RAPPORT DEPUIS DASHBOARD ── */
-function ouvrirRapport(id) {
-  loadData();
-  const g = gembaData.find(x=>x.id===id); if (!g) return;
-  reinitialiser(false);
-  document.getElementById('prenom').value    = g.prenom||'';
-  document.getElementById('nom').value       = g.nom||'';
-  document.getElementById('dateGemba').value = g.date||'';
-  if (g.zone) document.getElementById('lieu').value = g.zone;
-  document.getElementById('lieuAutre').value  = g.zoneDetail||'';
-  document.getElementById('qw1Action').value  = g.quickwin||'';
-  document.getElementById('dateSuivi').value  = g.suivi||'';
-  document.getElementById('commentaires').value = g.notes||'';
-  showView('rapport', document.getElementById('tabRapp'));
+/* ── PARTAGER ── */
+function partagerRapport(){
+  const url=window.location.href;
+  if(navigator.share){navigator.share({title:'Gemba Walk',url});}
+  else{navigator.clipboard?.writeText(url).then(()=>toast('🔗 Lien copié !','success'));}
 }
 
-/* ── RÉINITIALISER ── */
-function reinitialiser(ask) {
-  if (ask && !confirm('Réinitialiser le rapport ? Toutes les données saisies seront perdues.')) return;
-  document.querySelectorAll('#viewRapport input, #viewRapport textarea, #viewRapport select').forEach(el => {
-    if (el.readOnly) return;
-    el.tagName==='SELECT' ? el.selectedIndex=0 : (el.value='');
-  });
+/* ── PRÉSENTATION ── */
+function modePresentation(){
+  const p=document.getElementById('prenom').value||'?';
+  const n=document.getElementById('nom').value||'?';
+  const zone=(document.getElementById('lieu').value||'')+(document.getElementById('lieuAutre').value?' — '+document.getElementById('lieuAutre').value:'');
+  const qw=document.getElementById('qw1Action').value;
+  const nbObs=document.querySelectorAll('.obs-item').length;
+  const avant=document.getElementById('avant').value;
+  const apres=document.getElementById('apres').value;
+  const gains=document.getElementById('gainsMesures').value;
+  document.getElementById('presContent').innerHTML=`
+    <div style="text-align:center;margin-bottom:28px;">
+      <div style="font-family:'DM Mono',monospace;font-size:11px;color:#9ca3af;letter-spacing:.2em;text-transform:uppercase;margin-bottom:8px;">Gemba Walk</div>
+      <h1 style="font-family:'Syne',sans-serif;font-size:44px;font-weight:800;letter-spacing:-.04em;color:#16181c;">${p} ${n}</h1>
+      <p style="font-size:15px;color:#6b7280;margin-top:8px;">${zone} · ${fmtDate(document.getElementById('dateGemba').value)}</p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px;">
+      <div style="background:#f0f2f5;border:1px solid #e2e5ea;border-radius:10px;padding:18px;text-align:center;">
+        <div style="font-family:'DM Mono',monospace;font-size:38px;font-weight:300;color:#2563eb;">${nbObs}</div>
+        <div style="font-size:12px;color:#6b7280;margin-top:4px;">Observations</div>
+      </div>
+      <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:18px;text-align:center;">
+        <div style="font-family:'DM Mono',monospace;font-size:38px;font-weight:300;color:#d97706;">1-2</div>
+        <div style="font-size:12px;color:#6b7280;margin-top:4px;">Quick Wins</div>
+      </div>
+      <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:18px;text-align:center;">
+        <div style="font-family:'DM Mono',monospace;font-size:38px;font-weight:300;color:#16a34a;">${gains?'📈':'—'}</div>
+        <div style="font-size:12px;color:#6b7280;margin-top:4px;">Gains mesurés</div>
+      </div>
+    </div>
+    ${qw?`<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:18px;margin-bottom:14px;">
+      <div style="font-size:11px;color:#d97706;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;">⭐ Quick Win prioritaire</div>
+      <div style="font-size:17px;font-weight:600;color:#16181c;">${qw}</div>
+    </div>`:''}
+    ${(avant||apres)?`<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div style="background:#fff5f5;border:1px solid #fecaca;border-radius:10px;padding:14px;">
+        <div style="font-size:11px;color:#dc2626;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px;">🔴 Avant</div>
+        <div style="font-size:13px;line-height:1.6;color:#16181c;">${avant||'—'}</div>
+      </div>
+      <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px;">
+        <div style="font-size:11px;color:#16a34a;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px;">🟢 Après</div>
+        <div style="font-size:13px;line-height:1.6;color:#16181c;">${apres||'—'}</div>
+      </div>
+    </div>`:''}
+    ${gains?`<div style="margin-top:12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px;text-align:center;font-size:14px;font-weight:600;color:#16a34a;">📈 ${gains}</div>`:''}
+  `;
+  document.getElementById('presOverlay').classList.add('open');
+}
+
+/* ── DASHBOARD ── */
+function renderDashboard(){
+  loadData();
+  const t=gembaData.length,ec=gembaData.filter(g=>g.statut==='en_cours').length;
+  const as=gembaData.filter(g=>g.statut==='a_suivre').length,te=gembaData.filter(g=>g.statut==='termine').length;
+  const ta=gembaData.reduce((s,g)=>s+(+g.nbActions||0),0),td=gembaData.reduce((s,g)=>s+(+g.nbDone||0),0);
+  document.getElementById('statsGrid').innerHTML=`
+    <div class="stat"><div class="stat-l">Total</div><div class="stat-v">${t}</div></div>
+    <div class="stat"><div class="stat-l">En cours</div><div class="stat-v orange">${ec}</div></div>
+    <div class="stat"><div class="stat-l">À suivre</div><div class="stat-v blue">${as}</div></div>
+    <div class="stat"><div class="stat-l">Terminés</div><div class="stat-v green">${te}</div></div>
+    <div class="stat"><div class="stat-l">Actions</div><div class="stat-v" style="font-size:19px;">${td}<span style="font-size:12px;color:var(--muted);">/${ta}</span></div></div>
+  `;
+  renderTrend();renderCatBreakdown();
+  const fs=[{id:'all',l:'Tous'},{id:'en_cours',l:'⏳ En cours'},{id:'a_suivre',l:'👁 À suivre'},{id:'termine',l:'✅ Terminés'}];
+  document.getElementById('filterBar').innerHTML=fs.map(f=>`<button class="fbtn${activeFilter===f.id?' active':''}" onclick="setFilter('${f.id}')">${f.l}</button>`).join('');
+  renderCards();
+}
+
+function renderTrend(){
+  const weeks={};
+  gembaData.forEach(g=>{if(!g.date)return;const d=new Date(g.date);const w=`S${getWeek(d)}`;weeks[w]=(weeks[w]||0)+1;});
+  const labels=Object.keys(weeks).slice(-8);
+  const max=Math.max(...Object.values(weeks),1);
+  document.getElementById('chartBars').innerHTML=labels.map(l=>`
+    <div class="chart-bar-wrap">
+      <div class="chart-bar" style="height:${Math.round((weeks[l]/max)*65)}px;" title="${weeks[l]} Gemba"></div>
+      <div class="chart-label">${l}</div>
+    </div>`).join('')||'<p style="font-size:12px;color:var(--muted2);margin:auto;">Aucune donnée</p>';
+}
+
+function renderCatBreakdown(){
+  const cats={};gembaData.forEach(g=>{if(g.objectif)cats[g.objectif]=(cats[g.objectif]||0)+1;});
+  const sorted=Object.entries(cats).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const colors=['#e8532a','#d97706','#2563eb','#16a34a','#7c3aed','#0891b2'];
+  document.getElementById('catBreakdown').innerHTML=sorted.map(([k,v],i)=>`
+    <div class="cat-item">
+      <div class="cat-dot" style="background:${colors[i%colors.length]}"></div>
+      <div class="cat-name">${k}</div><div class="cat-count">${v}</div>
+    </div>`).join('')||'<p style="font-size:12px;color:var(--muted2);grid-column:1/-1;">Aucune donnée</p>';
+}
+
+function setFilter(f){activeFilter=f;renderDashboard();}
+
+function renderCards(){
+  const filtered=activeFilter==='all'?gembaData:gembaData.filter(g=>g.statut===activeFilter);
+  const sorted=[...filtered].sort((a,b)=>{const o={en_cours:0,a_suivre:1,termine:2};return(o[a.statut]||0)-(o[b.statut]||0)||(b.date||'').localeCompare(a.date||'');});
+  const empty=document.getElementById('emptyState'),list=document.getElementById('gembaCards');
+  if(!sorted.length){empty.style.display='block';list.innerHTML='';return;}
+  empty.style.display='none';
+  const stCfg={en_cours:{l:'En cours',c:'ec',bc:'badge-orange'},a_suivre:{l:'À suivre',c:'as',bc:'badge-blue'},termine:{l:'Terminé',c:'te',bc:'badge-green'}};
+  list.innerHTML=sorted.map(g=>{
+    const st=stCfg[g.statut]||stCfg.en_cours;
+    const isR=g.statut==='en_cours'&&g.suivi&&new Date(g.suivi)<new Date();
+    const nb=+g.nbActions||0,dn=Math.min(+g.nbDone||0,nb),pct=nb?Math.round((dn/nb)*100):null;
+    const zone=g.zoneDetail?`${g.zone} — ${g.zoneDetail}`:(g.zone||'—');
+    return`<div class="gcard ${st.c}${isR?' rt':''}">
+      <div class="gcard-top">
+        <div>
+          <div class="gcard-name">${g.prenom||''} ${g.nom||''}</div>
+          <div class="gcard-meta"><span>📍 ${zone}</span><span>🎯 ${g.objectif||'—'}</span><span>📅 ${fmtDate(g.date)}</span>${g.nbObs?`<span>👁 ${g.nbObs} obs.</span>`:''}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;">
+          <div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;">
+            <span class="badge ${st.bc}">${st.l}</span>
+            ${isR?'<span class="badge badge-red">Retard</span>':''}
+          </div>
+          <div class="gcard-actions">
+            <button class="btn btn-ghost btn-sm" onclick="ouvrirRapport('${g.id}')" title="Ouvrir le rapport">📝</button>
+            <button class="btn btn-ghost btn-sm" onclick="openModal('${g.id}')" title="Modifier">✏️</button>
+            <button class="btn btn-danger btn-sm" onclick="delGemba('${g.id}')" title="Supprimer">🗑</button>
+          </div>
+        </div>
+      </div>
+      ${g.quickwin?`<div class="gcard-qw"><span class="qw-l">QW</span><span>${g.quickwin}</span></div>`:''}
+      ${pct!==null?`<div class="gcard-prog-label"><span>Actions</span><span>${dn}/${nb}</span></div><div class="prog"><div class="prog-fill${pct===100?' done':''}" style="width:${pct}%"></div></div>`:''}
+      <div class="gcard-footer">${g.suivi?`<span>🔁 Suivi ${fmtDate(g.suivi)}</span>`:''}${g.notes?`<span style="font-style:italic;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:320px;">${g.notes}</span>`:''}</div>
+    </div>`;
+  }).join('');
+}
+
+function delGemba(id){if(!confirm('Supprimer ?'))return;gembaData=gembaData.filter(g=>g.id!==id);saveData();renderDashboard();toast('🗑 Supprimé');}
+
+/* ── MODAL ── */
+function openModal(id){
+  editId=id;const g=gembaData.find(x=>x.id===id);if(!g)return;
+  ['prenom','nom','zoneDetail','quickwin','notes'].forEach(k=>document.getElementById('m_'+k).value=g[k]||'');
+  ['date','suivi','zone','objectif','statut'].forEach(k=>document.getElementById('m_'+k).value=g[k]||'');
+  document.getElementById('m_nbActions').value=g.nbActions||0;
+  document.getElementById('m_nbDone').value=g.nbDone||0;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function closeModal(){document.getElementById('modalOverlay').classList.remove('open');}
+function saveModal(){
+  const g=gembaData.find(x=>x.id===editId);if(!g)return;
+  ['prenom','nom','zoneDetail','quickwin','notes'].forEach(k=>g[k]=document.getElementById('m_'+k).value.trim());
+  ['date','suivi','zone','objectif','statut'].forEach(k=>g[k]=document.getElementById('m_'+k).value);
+  g.nbActions=+document.getElementById('m_nbActions').value||0;
+  g.nbDone=+document.getElementById('m_nbDone').value||0;
+  saveData();closeModal();renderDashboard();toast('✅ Mis à jour','success');
+}
+document.getElementById('modalOverlay').addEventListener('click',e=>{if(e.target===document.getElementById('modalOverlay'))closeModal();});
+
+/* ── OUVRIR RAPPORT ── */
+function ouvrirRapport(id){
+  loadData();const g=gembaData.find(x=>x.id===id);if(!g)return;
+  reinitialiser(false);
+  document.getElementById('prenom').value=g.prenom||'';
+  document.getElementById('nom').value=g.nom||'';
+  document.getElementById('dateGemba').value=g.date||'';
+  if(g.zone)document.getElementById('lieu').value=g.zone;
+  document.getElementById('lieuAutre').value=g.zoneDetail||'';
+  document.getElementById('qw1Action').value=g.quickwin||'';
+  document.getElementById('dateSuivi').value=g.suivi||'';
+  document.getElementById('commentaires').value=g.notes||'';
+  showView('Rapport',document.getElementById('tabRapp'));
+  toast('📝 Rapport chargé — '+g.prenom+' '+g.nom);
+}
+
+/* ── STATS ── */
+function renderStats(){
+  loadData();
+  if(!gembaData.length){document.getElementById('statsDetailed').innerHTML='<p style="color:var(--muted);font-size:14px;">Aucune donnée disponible.</p>';return;}
+  const ta=gembaData.reduce((s,g)=>s+(+g.nbActions||0),0),td=gembaData.reduce((s,g)=>s+(+g.nbDone||0),0);
+  const avgObs=Math.round(gembaData.reduce((s,g)=>s+(+g.nbObs||0),0)/gembaData.length);
+  const retard=gembaData.filter(g=>g.statut==='en_cours'&&g.suivi&&new Date(g.suivi)<new Date()).length;
+  const tauxRes=ta?Math.round((td/ta)*100):0;
+  document.getElementById('statsDetailed').innerHTML=`
+    <div class="stat-page-grid">
+      <div class="stat"><div class="stat-l">Taux résolution</div><div class="stat-v green">${tauxRes}%</div></div>
+      <div class="stat"><div class="stat-l">Moy. obs./Gemba</div><div class="stat-v blue">${avgObs}</div></div>
+      <div class="stat"><div class="stat-l">Gemba en retard</div><div class="stat-v red">${retard}</div></div>
+      <div class="stat"><div class="stat-l">Total observations</div><div class="stat-v">${gembaData.reduce((s,g)=>s+(+g.nbObs||0),0)}</div></div>
+    </div>
+    <div class="trend-card">
+      <div class="trend-title">Historique</div>
+      ${gembaData.map(g=>`
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">
+          <div style="width:3px;height:34px;border-radius:99px;background:${g.statut==='termine'?'var(--green)':g.statut==='a_suivre'?'var(--accent2)':'var(--gold)'}"></div>
+          <div style="flex:1;"><div style="font-size:13px;font-weight:600;">${g.prenom} ${g.nom}</div><div style="font-size:11px;color:var(--muted);">${g.zone||'—'} · ${fmtDate(g.date)}</div></div>
+          <span class="badge badge-${g.statut==='termine'?'green':g.statut==='a_suivre'?'blue':'orange'}">${g.statut==='termine'?'Terminé':g.statut==='a_suivre'?'À suivre':'En cours'}</span>
+        </div>`).join('')}
+    </div>`;
+}
+
+/* ── RESET ── */
+function reinitialiser(ask){
+  if(ask&&!confirm('Réinitialiser le rapport ?'))return;
+  document.querySelectorAll('#viewRapport input:not([readonly]),#viewRapport textarea,#viewRapport select').forEach(el=>{el.tagName==='SELECT'?el.selectedIndex=0:(el.value='');});
   document.getElementById('obsList').innerHTML='';
   document.getElementById('actionList').innerHTML='';
-  obsCount=0; actCount=0;
+  document.querySelectorAll('.check-item').forEach(el=>{el.classList.remove('checked');el.querySelector('.check-box').textContent='';});
+  document.getElementById('checkScore').textContent='0 / 5';
+  obsCount=0;actCount=0;
   document.getElementById('dateGemba').valueAsDate=new Date();
-  addObservation();
+  document.getElementById('dateSig').valueAsDate=new Date();
 }
 
 /* ── INIT ── */
-loadData();
-renderDashboard();
-document.getElementById('dateGemba').valueAsDate = new Date();
-addObservation();
+loadData();renderDashboard();
+document.getElementById('dateGemba').valueAsDate=new Date();
+document.getElementById('dateSig').valueAsDate=new Date();
+setTimeout(initMatrix,300);
+['timerModal'].forEach(id=>document.getElementById(id).addEventListener('click',e=>{if(e.target===document.getElementById(id))document.getElementById(id).classList.remove('open');}));
 </script>
 </body>
 </html>
